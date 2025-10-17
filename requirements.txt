@@ -1,0 +1,83 @@
+# ============================================================================
+# Fantasy Premier League Prediction - Python Dependencies
+# ============================================================================
+# Install all dependencies with: pip install -r requirements.txt
+# ============================================================================
+
+# Core Data Science Libraries
+# ----------------------------------------------------------------------------
+pandas>=1.3.0              # Data manipulation and analysis
+numpy>=1.21.0              # Numerical computing
+scipy>=1.7.0               # Scientific computing
+
+# Visualization
+# ----------------------------------------------------------------------------
+matplotlib>=3.4.0          # Plotting and visualization
+seaborn>=0.11.0            # Statistical data visualization
+
+# Machine Learning
+# ----------------------------------------------------------------------------
+scikit-learn>=1.0.0        # ML algorithms and preprocessing
+                           # Includes: Ridge, StandardScaler, LabelEncoder,
+                           # train_test_split, metrics
+
+# Model Explainability (XAI)
+# ----------------------------------------------------------------------------
+shap>=0.41.0               # SHAP (SHapley Additive exPlanations)
+lime>=0.2.0                # LIME (Local Interpretable Model-agnostic Explanations)
+
+# Jupyter Environment
+# ----------------------------------------------------------------------------
+jupyter>=1.0.0             # Jupyter notebook interface
+ipython>=7.0.0             # Enhanced interactive Python shell
+ipykernel>=6.0.0           # IPython kernel for Jupyter
+
+# Data Loading & Storage
+# ----------------------------------------------------------------------------
+openpyxl>=3.0.0            # Excel file support (optional)
+xlrd>=2.0.0                # Legacy Excel support (optional)
+
+# Additional Utilities
+# ----------------------------------------------------------------------------
+tqdm>=4.60.0               # Progress bars (optional)
+joblib>=1.0.0              # Model serialization (alternative to pickle)
+
+# ============================================================================
+# Optional Dependencies for Enhanced Functionality
+# ============================================================================
+
+# Deep Learning (if implementing FFNN alternative)
+# ----------------------------------------------------------------------------
+# tensorflow>=2.8.0        # TensorFlow for neural networks
+# keras>=2.8.0             # High-level neural network API
+# torch>=1.10.0            # PyTorch (alternative to TensorFlow)
+
+# Advanced Visualization
+# ----------------------------------------------------------------------------
+# plotly>=5.0.0            # Interactive plotting
+# bokeh>=2.4.0             # Interactive visualization library
+
+# Model Tracking & Versioning
+# ----------------------------------------------------------------------------
+# mlflow>=1.20.0           # ML experiment tracking
+# wandb>=0.12.0            # Weights & Biases experiment tracking
+
+# API Development (if deploying as web service)
+# ----------------------------------------------------------------------------
+# flask>=2.0.0             # Lightweight web framework
+# fastapi>=0.70.0          # Modern web framework for APIs
+# uvicorn>=0.15.0          # ASGI server for FastAPI
+
+# Testing
+# ----------------------------------------------------------------------------
+# pytest>=6.2.0            # Testing framework
+# pytest-cov>=2.12.0       # Coverage reporting
+
+# ============================================================================
+# Version Compatibility Notes
+# ============================================================================
+# Python 3.8+ required
+# Tested on Python 3.8, 3.9, 3.10
+# SHAP may require Microsoft Visual C++ on Windows
+# Some packages may need pip upgrade: python -m pip install --upgrade pip
+# ============================================================================
