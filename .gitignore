@@ -1,0 +1,20 @@
+# Virtual environments
+venv/
+.venv/
+
+# Python artifacts
+__pycache__/
+*.pyc
+
+# Environment and config
+.env
+
+# Streamlit and cache
+.streamlit/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+Thumbs.db

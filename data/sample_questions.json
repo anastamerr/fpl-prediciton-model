@@ -1,0 +1,17 @@
+[
+  {
+    "question": "Who are the top forwards this season?",
+    "context": {"note": "Replace with KG results when running evaluator"},
+    "gold_answer": null
+  },
+  {
+    "question": "Show me fixtures for gameweek 10.",
+    "context": {"note": "Replace with KG fixtures subset for GW10"},
+    "gold_answer": null
+  },
+  {
+    "question": "Compare Haaland vs Kane for 2022-23.",
+    "context": {"note": "Populate with side-by-side stats for both players"},
+    "gold_answer": null
+  }
+]

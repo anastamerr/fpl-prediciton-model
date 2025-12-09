@@ -1,0 +1,7 @@
+[
+  {"question": "Who are the top forwards this season?", "context": "TODO: insert KG results", "gold_answer": null},
+  {"question": "Show me fixtures for gameweek 10.", "context": "TODO: insert GW10 fixtures", "gold_answer": null},
+  {"question": "Compare Haaland vs Kane for 2022-23.", "context": "TODO: side-by-side stats", "gold_answer": null},
+  {"question": "Which teams had the best defense in 2022-23?", "context": "TODO: team defense aggregates", "gold_answer": null},
+  {"question": "Best recent performers last 5 gameweeks.", "context": "TODO: form table", "gold_answer": null}
+]

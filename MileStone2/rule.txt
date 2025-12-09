@@ -1,0 +1,63 @@
+Defender scoring rule (Python)
+--------------------------------
+```python
+def calculate_defender_points(props):
+    minutes = int(props.get("minutes", 0))
+    playing_points = 0 if minutes == 0 else 1 if minutes < 60 else 2
+    assist_points = int(props.get("assists", 0)) * 3
+    penalty_miss_points = int(props.get("penalties_missed", 0)) * -2
+    own_goal_points = int(props.get("own_goals", 0)) * -2
+    yellow_card_points = int(props.get("yellow_cards", 0)) * -1
+    red_card_points = int(props.get("red_cards", 0)) * -3
+    bonus_points = int(props.get("bonus", 0))
+    goal_points = int(props.get("goals_scored", 0)) * 6
+    clean_sheet_points = 4 if int(props.get("clean_sheets", 0)) > 0 and minutes > 60 else 0
+    goals_conceded_points = -(int(props.get("goals_conceded", 0)) // 2)
+    return (
+        playing_points
+        + assist_points
+        + penalty_miss_points
+        + own_goal_points
+        + yellow_card_points
+        + red_card_points
+        + bonus_points
+        + goal_points
+        + clean_sheet_points
+        + goals_conceded_points
+    )
+```
+
+Detection workflow (used inside create_kg.py)
+1. Identify players with multiple positions where one is `DEF`:
+   ```cypher
+   MATCH (p:Player)-[:PLAYS_AS]->(pos:Position)
+   WITH p, COLLECT(pos.name) AS positions
+   WHERE 'DEF' IN positions AND size(positions) > 1
+   RETURN p.player_name AS player_name, p.player_element AS player_element, positions
+   ```
+2. For each candidate, fetch every `PLAYED_IN` relation with its season/fixture:
+   ```cypher
+   MATCH (p:Player {player_name: $player_name, player_element: $player_element})-[r:PLAYED_IN]->(f:Fixture)
+   MATCH (f)<-[:HAS_FIXTURE]-(gw:Gameweek)<-[:HAS_GW]-(s:Season)
+   RETURN s.season_name AS season, f.fixture_number AS fixture_number, r AS rel
+   ORDER BY s.season_name, f.fixture_number
+   ```
+3. In Python, compute `def_score = calculate_defender_points(rel)` for each fixture and
+   flag any fixture where `def_score != rel["total_points"]`.
+4. Report per player:
+   ```json
+   {
+     "player": "Player Name",
+     "not_def_fixtures": <count>,
+     "total_fixtures": <count>,
+     "fixture_details": [
+       {
+         "season": "...",
+         "fixture_number": 160,
+         "total_points": 1,
+         "def_score": 0,
+         "matches_def": false
+       }
+     ]
+   }
+   ```
