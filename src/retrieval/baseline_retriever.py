@@ -45,7 +45,7 @@ class BaselineRetriever:
             "fixture_analysis": "fixtures_for_team",
             "statistics_query": "top_players_by_stat",
             "comparison_query": "player_comparison",
-            "form_analysis": "player_form",
+            "form_analysis": "form_leaders",
             "historical_query": "historical_best_xi",
             "general_question": "top_players_by_position",
         }
@@ -101,6 +101,7 @@ class BaselineRetriever:
             "consistent_performers": self._build_consistency_params,
             "players_by_team_and_position": self._build_team_position_params,
             "budget_team_builder": self._build_budget_params,
+            "form_leaders": self._build_form_leaders_params,
         }
         if template_name not in builders:
             raise KeyError(f"No params builder for template {template_name}")
@@ -144,10 +145,6 @@ class BaselineRetriever:
             "season": self._season_or_default(entities.get("seasons")),
             "limit": num.get("limit", 10),
         }
-        # Add price filter if max_price is specified
-        max_price = num.get("max_price")
-        if max_price is not None:
-            params["max_price"] = max_price
         return params
 
     def _build_top_by_stat_params(self, entities: Dict[str, Any]) -> Dict[str, Any]:
@@ -179,6 +176,14 @@ class BaselineRetriever:
         return {
             "player_name": self._first_value(entities.get("players")),
             "last_n_gameweeks": entities.get("numerical_values", {}).get("last_n_gameweeks", 5),
+        }
+
+    def _build_form_leaders_params(self, entities: Dict[str, Any]) -> Dict[str, Any]:
+        num = entities.get("numerical_values", {})
+        return {
+            "last_n_gameweeks": num.get("last_n_gameweeks", 5),
+            "season": self._season_or_default(entities.get("seasons")),
+            "limit": num.get("limit", 10),
         }
 
     def _build_fixture_params(self, entities: Dict[str, Any]) -> Dict[str, Any]:
@@ -242,9 +247,8 @@ class BaselineRetriever:
 
     def _build_budget_params(self, entities: Dict[str, Any]) -> Dict[str, Any]:
         num = entities.get("numerical_values", {})
-        budget = num.get("budget", num.get("max_price"))
         return {
-            "max_budget": budget if budget is not None else 100.0,
+            "max_budget": num.get("budget", 100.0),
             "season": self._season_or_default(entities.get("seasons")),
             "formation": num.get("formation", "3-4-3"),
             "limit": num.get("limit", 15),

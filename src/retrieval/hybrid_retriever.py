@@ -29,10 +29,16 @@ class HybridRetriever:
         baseline_result = self.baseline.retrieve(intent=intent, entities=entities)
         embedding_hits: List[EmbeddingHit] = []
         try:
-            # Extract position filter from entities if available
+            # Extract position filter and anchor player if available
             positions = entities.get("positions", [])
             position_filter = positions[0] if positions else None
-            embedding_hits = self.embedding.search(user_query, position=position_filter)
+            players = entities.get("players") or []
+            anchor = players[0] if players else None
+            if anchor:
+                exclude_players = players  # avoid self in results
+                embedding_hits = self.embedding.search(
+                    anchor_player=anchor, position=position_filter, exclude_players=exclude_players
+                )
         except Exception as exc:  # pylint: disable=broad-except
             logger.warning("Embedding search failed: %s", exc)
 

@@ -47,6 +47,8 @@ MODELS = [
     "moonshotai/kimi-k2:free",
     "meta-llama/llama-3.3-70b-instruct:free",
     "google/gemini-2.0-flash-exp:free",
+    "google/gemini-2.0-flash-lite-001",
+    "openai/gpt-5-nano",
 ]
 
 RETRIEVAL_METHODS = [
@@ -67,7 +69,7 @@ EXAMPLE_QUERIES = [
 
 _classifier = FPLIntentClassifier()
 _extractor = None  # Initialized after Neo4j connection
-LLM_ENABLED = os.getenv("ENABLE_LLM", "1").lower() in ("1", "true", "yes")
+LLM_ENABLED = 1
 
 
 def load_player_index(driver) -> List[str]:
@@ -127,6 +129,7 @@ def run_pipeline(
 ) -> Dict[str, Any]:
     intent_result = _classifier.classify(query)
     entities = _extractor.extract(query)
+    anchor_player = entities.players[0] if entities.players else None
 
     baseline_records: List[Dict[str, Any]] = []
     cypher_query = None
@@ -165,18 +168,49 @@ def run_pipeline(
 
     if driver and use_embedding:
         try:
-            emb = EmbeddingRetriever(driver, model_alias=embed_model, top_k=20)
-            # Extract position filter from entities (use first position if multiple)
+            emb = EmbeddingRetriever(driver, top_k=20)
+            # Extract anchor player and optional position filter
             position_filter = entities.positions[0] if entities.positions else None
-            embedding_hits = [hit.__dict__ for hit in emb.search(query_text=query, k=20, position=position_filter)]
-            if "Hybrid" in retrieval_choice and baseline_runner:
-                fused = HybridRetriever(baseline_runner, emb).retrieve(
-                    intent=intent_result.intent, entities=entities.__dict__, user_query=query
-                ).fused
+            if anchor_player:
+                embedding_hits = [
+                    hit.__dict__
+                    for hit in emb.search(
+                        anchor_player=anchor_player,
+                        k=20,
+                        position=position_filter,
+                        exclude_players=entities.players,
+                    )
+                ]
+                if "Hybrid" in retrieval_choice and baseline_runner:
+                    fused = HybridRetriever(baseline_runner, emb).retrieve(
+                        intent=intent_result.intent, entities=entities.__dict__, user_query=query
+                    ).fused
+            else:
+                errors.append("Embedding search skipped: provide a player name to anchor similarity.")
         except Exception as exc:  # pragma: no cover - defensive
             errors.append(f"Embedding retrieval skipped/failed: {exc}")
     elif use_embedding:
         embedding_hits = [{"note": "Neo4j not connected; no embeddings retrieved."}]
+
+    # Fallback: if embedding-only returned too little context, pull a small baseline slice.
+    if driver and use_embedding and not baseline_records:
+        if len(embedding_hits) < 3 or intent_result.intent in ("general_question", "team_recommendation", "form_analysis"):
+            try:
+                baseline_runner = baseline_runner or BaselineRetriever(driver)
+                # Prefer high points attackers for captain/attacking vibes.
+                positions_hint = entities.positions or ["FWD", "MID"]
+                fallback_entities = {
+                    "seasons": entities.seasons,
+                    "positions": positions_hint,
+                    "statistics": ["total_points"],
+                    "numerical_values": {"limit": 5},
+                }
+                stat_res = baseline_runner.retrieve(intent="statistics_query", entities=fallback_entities)
+                if stat_res.records:
+                    baseline_records = stat_res.records
+                    cypher_query = cypher_query or stat_res.query
+            except Exception as exc:  # pragma: no cover
+                errors.append(f"Embedding fallback retrieval failed: {exc}")
 
     # Fallback: for team recommendations, ensure some baseline context even if user chose embeddings-only.
     if intent_result.intent == "team_recommendation" and driver and not baseline_records:
@@ -217,7 +251,16 @@ def run_pipeline(
         "baseline": baseline_records,
         "embedding_hits": embedding_hits,
         "fused": fused,
+        "anchor_player": anchor_player,
+        "embedding_summary": [
+            {"player": h.get("player"), "score": h.get("score")} for h in embedding_hits[:5]
+        ],
     }
+    if anchor_player and embedding_hits:
+        summary_str = ", ".join(
+            f"{h.get('player')} (score {round(h.get('score', 0), 3)})" for h in embedding_hits[:5]
+        )
+        context_for_llm["embedding_summary_text"] = f"Anchor: {anchor_player}; similar: {summary_str}"
     if not (baseline_records or embedding_hits or fused):
         llm_answer = (
             "No knowledge graph context retrieved. Try a more specific FPL question "
@@ -239,7 +282,9 @@ def run_pipeline(
         }
     if llm_generator and context_for_llm and LLM_ENABLED:
         try:
-            prompt = PromptBuilder().build_messages(user_query=query, kg_context=context_for_llm)
+            trimmed_context = dict(context_for_llm)
+            trimmed_context["embedding_hits"] = embedding_hits[:5]
+            prompt = PromptBuilder().build_messages(user_query=query, kg_context=trimmed_context)
             gen = llm_generator.generate(messages=prompt, model=model_choice)
             raw_content = gen.content
             cleaned = _clean_llm_content(raw_content)

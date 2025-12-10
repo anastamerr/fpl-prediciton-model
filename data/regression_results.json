@@ -1,0 +1,778 @@
+[
+  {
+    "question": "Who are the top forwards this season?",
+    "intent": "position_search",
+    "confidence": 0.62,
+    "entities": {
+      "players": [],
+      "teams": [],
+      "positions": [
+        "FWD"
+      ],
+      "seasons": [],
+      "gameweeks": [],
+      "statistics": [],
+      "numerical_values": {}
+    },
+    "retrieval_mode": "baseline",
+    "baseline_count": 10,
+    "embedding_count": 0,
+    "fused_count": 0,
+    "cypher_query": "\n    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)\n    MATCH (p:Player)-[:PLAYS_AS]->(:Position {name: $position})\n    MATCH (p)-[r:PLAYED_IN]->(f)\n    WITH p, SUM(r.total_points) AS total_points\n    RETURN p.player_name AS player, total_points\n    ORDER BY total_points DESC\n    LIMIT $limit\n    ",
+    "llm_answer": "Based on the provided data, the top forwards this season are:\n\n*   Erling Haaland (272 total points)\n*   Harry Kane (263 total points)\n*   Ivan Toney (182 total points)\n*   Ollie Watkins (175 total points)\n*   Callum Wilson (157 total points)\n*   Bryan Mbeumo (150 total points)\n*   Dominic Solanke (130 total points)\n*   Gabriel Fernando de Jesus (125 total points)\n*   Brennan Johnson (122 total points)\n*   Aleksandar Mitrovi\\u0107 (107 total points)\n",
+    "llm_meta": {
+      "model": "google/gemini-2.0-flash-lite-001",
+      "latency_ms": 1426,
+      "usage": {
+        "prompt_tokens": 422,
+        "completion_tokens": 156,
+        "total_tokens": 578,
+        "cost": 7.845e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": null,
+          "upstream_inference_prompt_cost": 3.165e-05,
+          "upstream_inference_completions_cost": 4.68e-05
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0
+        }
+      }
+    },
+    "context_summary": {
+      "players": [
+        "Aleksandar Mitrovi\u0107",
+        "Brennan Johnson",
+        "Bryan Mbeumo",
+        "Callum Wilson",
+        "Dominic Solanke",
+        "Erling Haaland",
+        "Gabriel Fernando de Jesus",
+        "Harry Kane",
+        "Ivan Toney",
+        "Ollie Watkins"
+      ],
+      "baseline_count": 10,
+      "embedding_count": 0
+    },
+    "issues": [
+      "LLM mentions names not in context: ['Based', 'Gabriel Fernando', 'Jesus', 'Aleksandar Mitrovi']"
+    ]
+  },
+  {
+    "question": "Compare Haaland vs Kane for 2022-23",
+    "intent": "comparison_query",
+    "confidence": 1.0,
+    "entities": {
+      "players": [
+        "Erling Haaland",
+        "Harry Kane"
+      ],
+      "teams": [],
+      "positions": [],
+      "seasons": [
+        "2022-23"
+      ],
+      "gameweeks": [],
+      "statistics": [],
+      "numerical_values": {}
+    },
+    "retrieval_mode": "baseline",
+    "baseline_count": 1,
+    "embedding_count": 0,
+    "fused_count": 0,
+    "cypher_query": "\n    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)\n    MATCH (p1:Player {player_name: $player1})-[r1:PLAYED_IN]->(f)\n    WITH $player2 AS player2_name, p1,\n         SUM(r1.total_points) AS p1_points,\n         SUM(r1.goals_scored) AS p1_goals,\n         SUM(r1.assists) AS p1_assists,\n         AVG(r1.ict_index) AS p1_ict,\n         COUNT(r1) AS p1_games\n    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f2:Fixture)\n    MATCH (p2:Player {player_name: player2_name})-[r2:PLAYED_IN]->(f2)\n    RETURN p1.player_name AS player1,\n           p1_points, p1_goals, p1_assists, p1_ict, p1_games,\n           p2.player_name AS player2,\n           SUM(r2.total_points) AS p2_points,\n           SUM(r2.goals_scored) AS p2_goals,\n           SUM(r2.assists) AS p2_assists,\n           AVG(r2.ict_index) AS p2_ict,\n           COUNT(r2) AS p2_games\n    ",
+    "llm_answer": "In the 2022-23 season, Erling Haaland scored 272 points with 36 goals and 9 assists, playing 38 games. Harry Kane scored 263 points with 30 goals and 9 assists, also playing 38 games. Haaland had an ICT index of 9.42, while Kane's was 9.43.\n",
+    "llm_meta": {
+      "model": "google/gemini-2.0-flash-lite-001",
+      "latency_ms": 1308,
+      "usage": {
+        "prompt_tokens": 334,
+        "completion_tokens": 86,
+        "total_tokens": 420,
+        "cost": 5.085e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": null,
+          "upstream_inference_prompt_cost": 2.505e-05,
+          "upstream_inference_completions_cost": 2.58e-05
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0
+        }
+      }
+    },
+    "context_summary": {
+      "players": [
+        "Erling Haaland",
+        "Harry Kane"
+      ],
+      "baseline_count": 1,
+      "embedding_count": 0
+    },
+    "issues": []
+  },
+  {
+    "question": "Recommend a squad with budget of 100m",
+    "intent": "team_recommendation",
+    "confidence": 1.0,
+    "entities": {
+      "players": [],
+      "teams": [],
+      "positions": [],
+      "seasons": [],
+      "gameweeks": [],
+      "statistics": [],
+      "numerical_values": {
+        "budget": 100.0
+      }
+    },
+    "retrieval_mode": "baseline",
+    "baseline_count": 15,
+    "embedding_count": 0,
+    "fused_count": 0,
+    "cypher_query": "\n    MATCH (p:Player)-[:PLAYS_AS]->(pos:Position)\n    MATCH (p)-[r:PLAYED_IN]->(:Fixture)<-[:HAS_FIXTURE]-(:Gameweek)<-[:HAS_GW]-(s:Season {season_name: $season})\n    WITH p, pos.name AS position, SUM(r.total_points) AS total_points\n    RETURN position, p.player_name AS player, total_points\n    ORDER BY total_points DESC\n    LIMIT $limit\n    ",
+    "llm_answer": "I am sorry, but I cannot recommend a squad with a budget of 100m because the context does not provide player prices.\n",
+    "llm_meta": {
+      "model": "google/gemini-2.0-flash-lite-001",
+      "latency_ms": 821,
+      "usage": {
+        "prompt_tokens": 684,
+        "completion_tokens": 29,
+        "total_tokens": 713,
+        "cost": 6e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": null,
+          "upstream_inference_prompt_cost": 5.13e-05,
+          "upstream_inference_completions_cost": 8.7e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0
+        }
+      }
+    },
+    "context_summary": {
+      "players": [
+        "Alisson Ramses Becker",
+        "Bruno Borges Fernandes",
+        "Bukayo Saka",
+        "David De Gea Quintana",
+        "David Raya Martin",
+        "Erling Haaland",
+        "Gabriel Martinelli Silva",
+        "Harry Kane",
+        "Ivan Toney",
+        "Kevin De Bruyne",
+        "Kieran Trippier",
+        "Marcus Rashford",
+        "Martin \u00d8degaard",
+        "Mohamed Salah",
+        "Ollie Watkins"
+      ],
+      "baseline_count": 15,
+      "embedding_count": 0
+    },
+    "issues": []
+  },
+  {
+    "question": "Show me fixtures for Liverpool in gameweek 10",
+    "intent": "fixture_analysis",
+    "confidence": 0.89,
+    "entities": {
+      "players": [],
+      "teams": [
+        "Liverpool"
+      ],
+      "positions": [],
+      "seasons": [],
+      "gameweeks": [
+        10
+      ],
+      "statistics": [],
+      "numerical_values": {}
+    },
+    "retrieval_mode": "baseline",
+    "baseline_count": 1,
+    "embedding_count": 0,
+    "fused_count": 0,
+    "cypher_query": "\n    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(gw:Gameweek {GW_number: $gameweek})\n    MATCH (gw)-[:HAS_FIXTURE]->(f:Fixture)\n    WHERE (f)-[:HAS_HOME_TEAM]->(:Team {name: $team_name})\n       OR (f)-[:HAS_AWAY_TEAM]->(:Team {name: $team_name})\n    RETURN f.fixture_number AS fixture_number,\n           f.kickoff_time AS kickoff_time,\n           [(f)-[:HAS_HOME_TEAM]->(home) | home.name][0] AS home_team,\n           [(f)-[:HAS_AWAY_TEAM]->(away) | away.name][0] AS away_team\n    ",
+    "llm_answer": "I am sorry, but I cannot provide information about Liverpool's fixtures in gameweek 10. The provided context only includes a fixture for gameweek 9.\n",
+    "llm_meta": {
+      "model": "google/gemini-2.0-flash-lite-001",
+      "latency_ms": 2015,
+      "usage": {
+        "prompt_tokens": 209,
+        "completion_tokens": 37,
+        "total_tokens": 246,
+        "cost": 2.6775e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": null,
+          "upstream_inference_prompt_cost": 1.5675e-05,
+          "upstream_inference_completions_cost": 1.11e-05
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0
+        }
+      }
+    },
+    "context_summary": {
+      "players": [],
+      "baseline_count": 1,
+      "embedding_count": 0
+    },
+    "issues": []
+  },
+  {
+    "question": "How did Salah perform in gameweek 15?",
+    "intent": "player_performance",
+    "confidence": 0.42,
+    "entities": {
+      "players": [
+        "Mohamed Salah"
+      ],
+      "teams": [],
+      "positions": [],
+      "seasons": [],
+      "gameweeks": [
+        15
+      ],
+      "statistics": [],
+      "numerical_values": {}
+    },
+    "retrieval_mode": "baseline",
+    "baseline_count": 1,
+    "embedding_count": 0,
+    "fused_count": 0,
+    "cypher_query": "\n    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(gw:Gameweek {GW_number: $gameweek})\n    MATCH (gw)-[:HAS_FIXTURE]->(f:Fixture)\n    MATCH (p:Player {player_name: $player_name})-[r:PLAYED_IN]->(f)\n    RETURN p.player_name AS player,\n           gw.GW_number AS gameweek,\n           f.fixture_number AS fixture,\n           r.minutes AS minutes,\n           r.goals_scored AS goals,\n           r.assists AS assists,\n           r.total_points AS points,\n           r.bonus AS bonus,\n           r.clean_sheets AS clean_sheets,\n           r.goals_conceded AS goals_conceded,\n           r.yellow_cards AS yellow_cards,\n           r.red_cards AS red_cards,\n           r.saves AS saves\n    ORDER BY f.fixture_number\n    ",
+    "llm_answer": "In gameweek 15, Mohamed Salah played 90 minutes, scored 2 goals, had 0 assists, earned 15 points, received 3 bonus points, and his team conceded 1 goal. He also had 0 clean sheets, 0 yellow cards, 0 red cards, and 0 saves.\n",
+    "llm_meta": {
+      "model": "google/gemini-2.0-flash-lite-001",
+      "latency_ms": 1258,
+      "usage": {
+        "prompt_tokens": 282,
+        "completion_tokens": 70,
+        "total_tokens": 352,
+        "cost": 4.215e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": null,
+          "upstream_inference_prompt_cost": 2.115e-05,
+          "upstream_inference_completions_cost": 2.1e-05
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0
+        }
+      }
+    },
+    "context_summary": {
+      "players": [
+        "Mohamed Salah"
+      ],
+      "baseline_count": 1,
+      "embedding_count": 0
+    },
+    "issues": []
+  },
+  {
+    "question": "Find players similar to Kevin De Bruyne",
+    "intent": "general_question",
+    "confidence": 0.2,
+    "entities": {
+      "players": [
+        "Kevin De Bruyne"
+      ],
+      "teams": [],
+      "positions": [],
+      "seasons": [],
+      "gameweeks": [],
+      "statistics": [],
+      "numerical_values": {}
+    },
+    "retrieval_mode": "hybrid",
+    "baseline_count": 10,
+    "embedding_count": 14,
+    "fused_count": 24,
+    "cypher_query": "\n    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)\n    MATCH (p:Player)-[:PLAYS_AS]->(:Position {name: $position})\n    MATCH (p)-[r:PLAYED_IN]->(f)\n    WITH p, SUM(r.total_points) AS total_points\n    RETURN p.player_name AS player, total_points\n    ORDER BY total_points DESC\n    LIMIT $limit\n    ",
+    "llm_answer": "Based on the provided context, the players similar to Kevin De Bruyne are: Martin \u00d8degaard (score 0.998), Eberechi Eze (score 0.995), Heung-Min Son (score 0.992), Ilkay G\u00fcndogan (score 0.992), and Son Heung-min (score 0.99).\n",
+    "llm_meta": {
+      "model": "google/gemini-2.0-flash-lite-001",
+      "latency_ms": 1290,
+      "usage": {
+        "prompt_tokens": 4204,
+        "completion_tokens": 85,
+        "total_tokens": 4289,
+        "cost": 0.0003408,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": null,
+          "upstream_inference_prompt_cost": 0.0003153,
+          "upstream_inference_completions_cost": 2.55e-05
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0
+        }
+      }
+    },
+    "context_summary": {
+      "players": [
+        "Aleksandar Mitrovi\u0107",
+        "Brennan Johnson",
+        "Bruno Miguel Borges Fernandes",
+        "Bryan Mbeumo",
+        "Bukayo Saka",
+        "Callum Wilson",
+        "Conor Gallagher",
+        "Dominic Solanke",
+        "Dwight McNeil",
+        "Eberechi Eze",
+        "Erling Haaland",
+        "Gabriel Fernando de Jesus",
+        "Gabriel Martinelli Silva",
+        "Harry Kane",
+        "Heung-Min Son",
+        "Ilkay G\u00fcndogan",
+        "Ivan Toney",
+        "Martin \u00d8degaard",
+        "Mason Mount",
+        "Ollie Watkins",
+        "Pascal Gro\u00df",
+        "Phil Foden",
+        "Riyad Mahrez",
+        "Son Heung-min"
+      ],
+      "baseline_count": 10,
+      "embedding_count": 14
+    },
+    "issues": [
+      "LLM mentions names not in context: ['Based', 'Kevin De', 'Bruyne', 'Martin', 'Heung']"
+    ]
+  },
+  {
+    "question": "Who should I captain this week?",
+    "intent": "team_recommendation",
+    "confidence": 1.0,
+    "entities": {
+      "players": [],
+      "teams": [],
+      "positions": [],
+      "seasons": [],
+      "gameweeks": [],
+      "statistics": [],
+      "numerical_values": {}
+    },
+    "retrieval_mode": "hybrid",
+    "baseline_count": 15,
+    "embedding_count": 0,
+    "fused_count": 0,
+    "cypher_query": "\n    MATCH (p:Player)-[:PLAYS_AS]->(pos:Position)\n    MATCH (p)-[r:PLAYED_IN]->(:Fixture)<-[:HAS_FIXTURE]-(:Gameweek)<-[:HAS_GW]-(s:Season {season_name: $season})\n    WITH p, pos.name AS position, SUM(r.total_points) AS total_points\n    RETURN position, p.player_name AS player, total_points\n    ORDER BY total_points DESC\n    LIMIT $limit\n    ",
+    "llm_answer": "Based on the provided data, the top three players in terms of total points are Erling Haaland (272), Harry Kane (263), and Mohamed Salah (239). Consider captaining one of these players.\n",
+    "llm_meta": {
+      "model": "google/gemini-2.0-flash-lite-001",
+      "latency_ms": 919,
+      "usage": {
+        "prompt_tokens": 680,
+        "completion_tokens": 48,
+        "total_tokens": 728,
+        "cost": 6.54e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": null,
+          "upstream_inference_prompt_cost": 5.1e-05,
+          "upstream_inference_completions_cost": 1.44e-05
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0
+        }
+      }
+    },
+    "context_summary": {
+      "players": [
+        "Alisson Ramses Becker",
+        "Bruno Borges Fernandes",
+        "Bukayo Saka",
+        "David De Gea Quintana",
+        "David Raya Martin",
+        "Erling Haaland",
+        "Gabriel Martinelli Silva",
+        "Harry Kane",
+        "Ivan Toney",
+        "Kevin De Bruyne",
+        "Kieran Trippier",
+        "Marcus Rashford",
+        "Martin \u00d8degaard",
+        "Mohamed Salah",
+        "Ollie Watkins"
+      ],
+      "baseline_count": 15,
+      "embedding_count": 0
+    },
+    "issues": [
+      "Embedding search skipped: provide a player name to anchor similarity."
+    ]
+  },
+  {
+    "question": "Best XI from 2021-22 season",
+    "intent": "historical_query",
+    "confidence": 1.0,
+    "entities": {
+      "players": [],
+      "teams": [],
+      "positions": [],
+      "seasons": [
+        "2021-22"
+      ],
+      "gameweeks": [],
+      "statistics": [],
+      "numerical_values": {}
+    },
+    "retrieval_mode": "baseline",
+    "baseline_count": 4,
+    "embedding_count": 0,
+    "fused_count": 0,
+    "cypher_query": "\n    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)\n    MATCH (p:Player)-[:PLAYS_AS]->(pos:Position)\n    MATCH (p)-[r:PLAYED_IN]->(f)\n    WITH p, pos.name AS position, SUM(r.total_points) AS total_points\n    WITH position, p, total_points\n    ORDER BY total_points DESC\n    WITH position,\n         CASE position WHEN 'DEF' THEN 3\n                       WHEN 'MID' THEN 4\n                       WHEN 'FWD' THEN 3\n                       ELSE 1 END AS cap,\n         p,\n         total_points\n    WITH position, cap, collect({player: p.player_name, points: total_points})[0..cap] AS picks\n    RETURN position, picks\n    ",
+    "llm_answer": "Here's the best XI from the 2021-22 season based on the provided data:\n\n*   **GK:** Alisson Ramses Becker (176 points)\n*   **DEF:** Trent Alexander-Arnold (208 points), Jo\\u00e3o Pedro Cavaco Cancelo (201 points), Andrew Robertson (186 points)\n*   **MID:** Mohamed Salah (265 points), Heung-Min Son (258 points), Jarrod Bowen (206 points), Kevin De Bruyne (196 points)\n*   **FWD:** Harry Kane (192 points), Cristiano Ronaldo dos Santos Aveiro (159 points), Teemu Pukki (142 points)\n",
+    "llm_meta": {
+      "model": "google/gemini-2.0-flash-lite-001",
+      "latency_ms": 1568,
+      "usage": {
+        "prompt_tokens": 530,
+        "completion_tokens": 166,
+        "total_tokens": 696,
+        "cost": 8.955e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": null,
+          "upstream_inference_prompt_cost": 3.975e-05,
+          "upstream_inference_completions_cost": 4.98e-05
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0
+        }
+      }
+    },
+    "context_summary": {
+      "players": [],
+      "baseline_count": 4,
+      "embedding_count": 0
+    },
+    "issues": [
+      "LLM mentions names not in context: ['Here', 'Alisson Ramses', 'Becker', 'Trent Alexander', 'Arnold']"
+    ]
+  },
+  {
+    "question": "Players with most goals in 2022-23",
+    "intent": "statistics_query",
+    "confidence": 1.0,
+    "entities": {
+      "players": [],
+      "teams": [],
+      "positions": [],
+      "seasons": [
+        "2022-23"
+      ],
+      "gameweeks": [],
+      "statistics": [
+        "goals_scored"
+      ],
+      "numerical_values": {}
+    },
+    "retrieval_mode": "baseline",
+    "baseline_count": 10,
+    "embedding_count": 0,
+    "fused_count": 0,
+    "cypher_query": "\n    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)\n    MATCH (p:Player)-[r:PLAYED_IN]->(f)\n    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)\n    WITH p, pos.name AS position, SUM(r.goals_scored) AS stat_value, SUM(r.total_points) AS total_points\n    RETURN p.player_name AS player, position, stat_value AS goals_scored, total_points\n    ORDER BY stat_value DESC\n    LIMIT $limit\n    ",
+    "llm_answer": "Erling Haaland scored the most goals with 36. Harry Kane scored 30 goals. Ivan Toney scored 20 goals.\n",
+    "llm_meta": {
+      "model": "google/gemini-2.0-flash-lite-001",
+      "latency_ms": 6277,
+      "usage": {
+        "prompt_tokens": 616,
+        "completion_tokens": 30,
+        "total_tokens": 646,
+        "cost": 5.52e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": null,
+          "upstream_inference_prompt_cost": 4.62e-05,
+          "upstream_inference_completions_cost": 9e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0
+        }
+      }
+    },
+    "context_summary": {
+      "players": [
+        "Bukayo Saka",
+        "Callum Wilson",
+        "Erling Haaland",
+        "Gabriel Martinelli Silva",
+        "Harry Kane",
+        "Ivan Toney",
+        "Marcus Rashford",
+        "Martin \u00d8degaard",
+        "Mohamed Salah",
+        "Ollie Watkins"
+      ],
+      "baseline_count": 10,
+      "embedding_count": 0
+    },
+    "issues": []
+  },
+  {
+    "question": "Best midfielders under 8m",
+    "intent": "position_search",
+    "confidence": 1.0,
+    "entities": {
+      "players": [],
+      "teams": [],
+      "positions": [
+        "MID"
+      ],
+      "seasons": [],
+      "gameweeks": [],
+      "statistics": [],
+      "numerical_values": {
+        "max_price": 8.0
+      }
+    },
+    "retrieval_mode": "baseline",
+    "baseline_count": 10,
+    "embedding_count": 0,
+    "fused_count": 0,
+    "cypher_query": "\n    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)\n    MATCH (p:Player)-[:PLAYS_AS]->(:Position {name: $position})\n    MATCH (p)-[r:PLAYED_IN]->(f)\n    WITH p, SUM(r.total_points) AS total_points\n    RETURN p.player_name AS player, total_points\n    ORDER BY total_points DESC\n    LIMIT $limit\n    ",
+    "llm_answer": "I am sorry, but the provided context does not contain information about player prices, so I am unable to answer this question.\n",
+    "llm_meta": {
+      "model": "google/gemini-2.0-flash-lite-001",
+      "latency_ms": 1200,
+      "usage": {
+        "prompt_tokens": 429,
+        "completion_tokens": 26,
+        "total_tokens": 455,
+        "cost": 3.9975e-05,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": null,
+          "upstream_inference_prompt_cost": 3.2175e-05,
+          "upstream_inference_completions_cost": 7.8e-06
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0
+        }
+      }
+    },
+    "context_summary": {
+      "players": [
+        "Bruno Borges Fernandes",
+        "Bukayo Saka",
+        "Eberechi Eze",
+        "Gabriel Martinelli Silva",
+        "Kevin De Bruyne",
+        "Marcus Rashford",
+        "Martin \u00d8degaard",
+        "Miguel Almir\u00f3n Rejala",
+        "Mohamed Salah",
+        "Pascal Gro\u00df"
+      ],
+      "baseline_count": 10,
+      "embedding_count": 0
+    },
+    "issues": []
+  },
+  {
+    "question": "Which players are in form right now?",
+    "intent": "form_analysis",
+    "confidence": 1.0,
+    "entities": {
+      "players": [],
+      "teams": [],
+      "positions": [],
+      "seasons": [],
+      "gameweeks": [],
+      "statistics": [],
+      "numerical_values": {}
+    },
+    "retrieval_mode": "hybrid",
+    "baseline_count": 10,
+    "embedding_count": 0,
+    "fused_count": 0,
+    "cypher_query": "\n    MATCH (s:Season)\n    WITH coalesce($season, s.season_name) AS target_season\n    ORDER BY target_season DESC\n    WITH target_season LIMIT 1\n    MATCH (s:Season {season_name: target_season})-[:HAS_GW]->(gw:Gameweek)\n    WITH s, gw\n    ORDER BY gw.GW_number DESC\n    WITH s, collect(gw)[0..$last_n_gameweeks] AS recent_gws\n    UNWIND recent_gws AS rgw\n    MATCH (rgw)-[:HAS_FIXTURE]->(f:Fixture)<-[:PLAYED_IN]-(p:Player)\n    WITH p, rgw, f\n    MATCH (p)-[r:PLAYED_IN]->(f)\n    WITH p,\n         collect(DISTINCT rgw.GW_number) AS gameweeks,\n         sum(r.total_points) AS total_points,\n         avg(r.total_points) AS avg_points,\n         sum(r.goals_scored) AS goals,\n         sum(r.assists) AS assists\n    RETURN p.player_name AS player,\n           gameweeks,\n           total_points,\n           avg_points,\n           goals,\n           assists\n    ORDER BY total_points DESC\n    LIMIT $limit\n    ",
+    "llm_answer": "Based on the provided data, here's a look at some in-form players:\n\n*   **Mohamed Salah:** 50 total points, averaging 8.33 points per game.\n*   **Harry Kane:** 46 total points, averaging 9.2 points per game.\n*   **Callum Wilson:** 41 total points, averaging 6.83 points per game.\n*   **Taiwo Awoniyi:** 39 total points, averaging 7.8 points per game.",
+    "llm_meta": {
+      "model": "google/gemini-2.0-flash-lite-001",
+      "latency_ms": 1677,
+      "usage": {
+        "prompt_tokens": 1141,
+        "completion_tokens": 113,
+        "total_tokens": 1254,
+        "cost": 0.000119475,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": null,
+          "upstream_inference_prompt_cost": 8.5575e-05,
+          "upstream_inference_completions_cost": 3.39e-05
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0
+        }
+      }
+    },
+    "context_summary": {
+      "players": [
+        "Bruno Borges Fernandes",
+        "Callum Wilson",
+        "David De Gea Quintana",
+        "Harry Kane",
+        "Ilkay G\u00fcndogan",
+        "Mohamed Salah",
+        "Pascal Gro\u00df",
+        "Pervis Estupi\u00f1\u00e1n",
+        "Taiwo Awoniyi",
+        "Trent Alexander-Arnold"
+      ],
+      "baseline_count": 10,
+      "embedding_count": 0
+    },
+    "issues": [
+      "Embedding search skipped: provide a player name to anchor similarity."
+    ]
+  },
+  {
+    "question": "Find players like Bruno Fernandes",
+    "intent": "general_question",
+    "confidence": 0.2,
+    "entities": {
+      "players": [
+        "Bruno Miguel Borges Fernandes"
+      ],
+      "teams": [],
+      "positions": [],
+      "seasons": [],
+      "gameweeks": [],
+      "statistics": [],
+      "numerical_values": {}
+    },
+    "retrieval_mode": "embedding",
+    "baseline_count": 0,
+    "embedding_count": 14,
+    "fused_count": 0,
+    "cypher_query": null,
+    "llm_answer": "Based on the provided context, the players similar to Bruno Fernandes are: Dwight McNeil (score 0.991), Son Heung-min (score 0.99), Pablo Fornals (score 0.99), Pascal Gro\u00df (score 0.99), and Sa\u00efd Benrahma (score 0.989).\n",
+    "llm_meta": {
+      "model": "google/gemini-2.0-flash-lite-001",
+      "latency_ms": 1368,
+      "usage": {
+        "prompt_tokens": 4432,
+        "completion_tokens": 75,
+        "total_tokens": 4507,
+        "cost": 0.0003549,
+        "is_byok": false,
+        "prompt_tokens_details": {
+          "cached_tokens": 0,
+          "audio_tokens": 0,
+          "video_tokens": 0
+        },
+        "cost_details": {
+          "upstream_inference_cost": null,
+          "upstream_inference_prompt_cost": 0.0003324,
+          "upstream_inference_completions_cost": 2.25e-05
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0,
+          "image_tokens": 0
+        }
+      }
+    },
+    "context_summary": {
+      "players": [
+        "Bukayo Saka",
+        "Demarai Gray",
+        "Dwight McNeil",
+        "Eberechi Eze",
+        "James Maddison",
+        "Kevin De Bruyne",
+        "Lucas Tolentino Coelho de Lima",
+        "Martin \u00d8degaard",
+        "Pablo Fornals",
+        "Pascal Gro\u00df",
+        "Raphael Dias Belloli",
+        "Sa\u00efd Benrahma",
+        "Son Heung-min",
+        "Youri Tielemans"
+      ],
+      "baseline_count": 0,
+      "embedding_count": 14
+    },
+    "issues": [
+      "LLM mentions names not in context: ['Based', 'Bruno Fernandes', 'Dwight Mc', 'Son Heung', 'Pascal Gro']"
+    ]
+  }
+]

@@ -19,6 +19,8 @@ SUPPORTED_MODELS = [
     "moonshotai/kimi-k2:free",
     "meta-llama/llama-3.3-70b-instruct:free",
     "google/gemini-2.0-flash-exp:free",
+    "google/gemini-2.0-flash-lite-001",
+    "openai/gpt-5-nano",
 ]
 
 

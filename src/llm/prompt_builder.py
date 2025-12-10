@@ -45,6 +45,23 @@ class PromptBuilder:
             return "No context retrieved."
         if isinstance(context, str):
             return context
+        if isinstance(context, dict):
+            parts = []
+            anchor = context.get("anchor_player")
+            summary_text = context.get("embedding_summary_text")
+            if anchor:
+                parts.append(f"Anchor player for similarity: {anchor}")
+            if summary_text:
+                parts.append(f"Similar players: {summary_text}")
+            if context.get("baseline"):
+                parts.append(f"Baseline rows: {len(context.get('baseline', []))}")
+            if context.get("embedding_hits"):
+                parts.append(f"Embedding hits: {len(context.get('embedding_hits', []))} (top shown)")
+            try:
+                raw = json.dumps(context, indent=2)[:6000]
+            except TypeError:
+                raw = str(context)
+            return "\n".join(parts + ["RAW CONTEXT:", raw])
         try:
             return json.dumps(context, indent=2)[:6000]
         except TypeError:

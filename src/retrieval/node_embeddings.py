@@ -27,7 +27,8 @@ class PlayerFeatures:
 class NodeEmbeddingGenerator:
     def __init__(self, driver, model_alias: str = "bge-small"):
         self.driver = driver
-        self.embedder = QueryEmbedder(model_alias=model_alias, normalize=True)
+        self.model_alias = model_alias
+        self.embedder: Optional[QueryEmbedder] = None
 
     def fetch_player_features(self) -> List[PlayerFeatures]:
         """
@@ -61,6 +62,21 @@ class NodeEmbeddingGenerator:
                 features={k: row[k] for k in row.keys() if k not in {"player_name", "player_element", "positions"}},
             )
             for row in rows
+        ]
+
+    @staticmethod
+    def _feature_keys() -> List[str]:
+        # Fixed ordering to ensure consistent vector layout
+        return [
+            "total_points",
+            "goals",
+            "assists",
+            "avg_minutes",
+            "avg_ict",
+            "avg_influence",
+            "avg_creativity",
+            "avg_threat",
+            "clean_sheets",
         ]
 
     def _compute_percentiles(self, all_features: List[PlayerFeatures]) -> Dict[str, Dict[str, float]]:
@@ -178,6 +194,29 @@ class NodeEmbeddingGenerator:
             f"creativity: {round(avg_creativity, 1)}, threat: {round(avg_threat, 1)}."
         )
 
+    def _to_numeric_vector(self, pf: PlayerFeatures, means: np.ndarray, stds: np.ndarray) -> np.ndarray:
+        keys = self._feature_keys()
+        raw = np.array([pf.features.get(k, 0) or 0 for k in keys], dtype=float)
+        # z-score normalize; avoid div by zero
+        stds_safe = np.where(stds == 0, 1.0, stds)
+        return (raw - means) / stds_safe
+
+    def _normalize_stats(self, all_features: List[PlayerFeatures]) -> (np.ndarray, np.ndarray):
+        keys = self._feature_keys()
+        matrix = []
+        for pf in all_features:
+            matrix.append([pf.features.get(k, 0) or 0 for k in keys])
+        arr = np.array(matrix, dtype=float)
+        means = np.mean(arr, axis=0)
+        stds = np.std(arr, axis=0)
+        stds[stds == 0] = 1.0
+        return means, stds
+
+    def _get_embedder(self) -> QueryEmbedder:
+        if self.embedder is None:
+            self.embedder = QueryEmbedder(model_alias=self.model_alias, normalize=True)
+        return self.embedder
+
     def generate_embeddings(
         self,
         use_text: bool = True,
@@ -187,27 +226,33 @@ class NodeEmbeddingGenerator:
         Return list of {player_element, embedding, player_name} ready to be persisted.
         """
         all_features = self.fetch_player_features()
-
-        # Compute percentiles from ALL players for proper ranking
-        percentiles = self._compute_percentiles(all_features) if use_text else None
-
         features = all_features[:limit] if limit else all_features
 
         payload = []
-        for pf in features:
-            if use_text:
+        if use_text:
+            percentiles = self._compute_percentiles(all_features)
+            embedder = self._get_embedder()
+            for pf in features:
                 text = self._to_text_feature(pf, percentiles)
-                vector = self.embedder.embed(text)
-            else:
-                numeric = np.array(list(pf.features.values()))
-                vector = self.embedder.embed(" ".join(map(str, numeric.tolist())))
-            payload.append(
-                {
-                    "player_element": pf.player_element,
-                    "player_name": pf.player_name,
-                    "embedding": vector.tolist(),
-                }
-            )
+                vector = embedder.embed(text)
+                payload.append(
+                    {
+                        "player_element": pf.player_element,
+                        "player_name": pf.player_name,
+                        "embedding": vector.tolist(),
+                    }
+                )
+        else:
+            means, stds = self._normalize_stats(all_features)
+            for pf in features:
+                vector = self._to_numeric_vector(pf, means, stds)
+                payload.append(
+                    {
+                        "player_element": pf.player_element,
+                        "player_name": pf.player_name,
+                        "embedding": vector.tolist(),
+                    }
+                )
         return payload
 
     def persist_embeddings(
@@ -224,7 +269,7 @@ class NodeEmbeddingGenerator:
         if not payload:
             return 0
 
-        dim = self.embedder.embedding_dimension()
+        dim = self._get_embedder().embedding_dimension() if use_text else len(self._feature_keys())
         index_cypher = f"""
         CREATE VECTOR INDEX {index_name} IF NOT EXISTS
         FOR (p:Player) ON p.{property_key}

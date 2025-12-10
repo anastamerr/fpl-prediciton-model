@@ -1,0 +1,74 @@
+[
+  {
+    "id": "q1_top_forwards",
+    "question": "Who are the top forwards this season?",
+    "mode": "baseline",
+    "note": "Ranking query; should use baseline Cypher."
+  },
+  {
+    "id": "q2_compare",
+    "question": "Compare Haaland vs Kane for 2022-23",
+    "mode": "baseline",
+    "note": "Comparison query; baseline side-by-side stats."
+  },
+  {
+    "id": "q3_budget_team",
+    "question": "Recommend a squad with budget of 100m",
+    "mode": "baseline",
+    "note": "Budget team recommendation; baseline first."
+  },
+  {
+    "id": "q4_fixtures",
+    "question": "Show me fixtures for Liverpool in gameweek 10",
+    "mode": "baseline",
+    "note": "Fixture lookup."
+  },
+  {
+    "id": "q5_player_performance",
+    "question": "How did Salah perform in gameweek 15?",
+    "mode": "baseline",
+    "note": "Player performance by GW."
+  },
+  {
+    "id": "q6_similarity_kdb",
+    "question": "Find players similar to Kevin De Bruyne",
+    "mode": "hybrid",
+    "note": "Similarity-heavy; hybrid to mix baseline context with embeddings."
+  },
+  {
+    "id": "q7_captain_pick",
+    "question": "Who should I captain this week?",
+    "mode": "hybrid",
+    "note": "Vague/vibes query; hybrid recommended."
+  },
+  {
+    "id": "q8_best_xi",
+    "question": "Best XI from 2021-22 season",
+    "mode": "baseline",
+    "note": "Historical best XI."
+  },
+  {
+    "id": "q9_top_scorers",
+    "question": "Players with most goals in 2022-23",
+    "mode": "baseline",
+    "note": "Top scorers."
+  },
+  {
+    "id": "q10_budget_mids",
+    "question": "Best midfielders under 8m",
+    "mode": "baseline",
+    "note": "Position + budget filter."
+  },
+  {
+    "id": "q11_form",
+    "question": "Which players are in form right now?",
+    "mode": "hybrid",
+    "note": "Recent form; hybrid ok."
+  },
+  {
+    "id": "q12_similarity_bruno",
+    "question": "Find players like Bruno Fernandes",
+    "mode": "embedding",
+    "note": "Explicit similarity; embeddings should dominate."
+  }
+]

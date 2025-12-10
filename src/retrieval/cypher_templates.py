@@ -50,28 +50,16 @@ def player_performance_by_gameweek(player_name: str, season: str, gameweek: int)
 
 def top_players_by_position(position: str, season: str, limit: int = 10, max_price: float = None) -> Tuple[str, Dict]:
     _require(locals(), ["position", "season"])
-    # Note: Price filtering requires 'now_cost' property on Player nodes.
-    # If not available, filter is ignored and all players returned by points.
-    price_filter = ""
-    price_note = ""
-    if max_price is not None:
-        price_filter = "WHERE p.now_cost IS NOT NULL AND p.now_cost <= $max_price"
-        price_note = "// Note: Price filter applied only if now_cost property exists"
-
     query = f"""
     MATCH (s:Season {{season_name: $season}})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
     MATCH (p:Player)-[:PLAYS_AS]->(:Position {{name: $position}})
     MATCH (p)-[r:PLAYED_IN]->(f)
     WITH p, SUM(r.total_points) AS total_points
-    {price_filter}
     RETURN p.player_name AS player, total_points
     ORDER BY total_points DESC
     LIMIT $limit
-    {price_note}
     """
     params = {"season": season, "position": position, "limit": limit}
-    if max_price is not None:
-        params["max_price"] = max_price
     return query, params
 
 
@@ -125,6 +113,41 @@ def player_form(player_name: str, last_n_gameweeks: int = 5) -> Tuple[str, Dict]
            avg(r.bps) AS avg_bps
     """
     return query, {"player_name": player_name, "last_n_gameweeks": last_n_gameweeks}
+
+
+def form_leaders(last_n_gameweeks: int = 5, season: str = None, limit: int = 10) -> Tuple[str, Dict]:
+    """
+    Top performers over the last N gameweeks (season optional; defaults to latest).
+    """
+    query = """
+    MATCH (s:Season)
+    WITH coalesce($season, s.season_name) AS target_season
+    ORDER BY target_season DESC
+    WITH target_season LIMIT 1
+    MATCH (s:Season {season_name: target_season})-[:HAS_GW]->(gw:Gameweek)
+    WITH s, gw
+    ORDER BY gw.GW_number DESC
+    WITH s, collect(gw)[0..$last_n_gameweeks] AS recent_gws
+    UNWIND recent_gws AS rgw
+    MATCH (rgw)-[:HAS_FIXTURE]->(f:Fixture)<-[:PLAYED_IN]-(p:Player)
+    WITH p, rgw, f
+    MATCH (p)-[r:PLAYED_IN]->(f)
+    WITH p,
+         collect(DISTINCT rgw.GW_number) AS gameweeks,
+         sum(r.total_points) AS total_points,
+         avg(r.total_points) AS avg_points,
+         sum(r.goals_scored) AS goals,
+         sum(r.assists) AS assists
+    RETURN p.player_name AS player,
+           gameweeks,
+           total_points,
+           avg_points,
+           goals,
+           assists
+    ORDER BY total_points DESC
+    LIMIT $limit
+    """
+    return query, {"season": season, "last_n_gameweeks": last_n_gameweeks, "limit": limit}
 
 
 def fixtures_for_team(team_name: str, season: str, gameweek: int) -> Tuple[str, Dict]:
@@ -286,12 +309,12 @@ def players_by_team_and_position(team_name: str, position: str, season: str) -> 
 
 def budget_team_builder(max_budget: float, season: str, formation: str = "3-4-3", limit: int = 15) -> Tuple[str, Dict]:
     _require(locals(), ["max_budget", "season"])
+    # Note: The current KG does not store player cost; this returns top scorers by position.
     query = """
     MATCH (p:Player)-[:PLAYS_AS]->(pos:Position)
     MATCH (p)-[r:PLAYED_IN]->(:Fixture)<-[:HAS_FIXTURE]-(:Gameweek)<-[:HAS_GW]-(s:Season {season_name: $season})
-    WITH p, pos.name AS position, SUM(r.total_points) AS total_points, p.now_cost AS cost
-    WHERE cost IS NOT NULL AND cost <= $max_budget
-    RETURN position, p.player_name AS player, cost, total_points
+    WITH p, pos.name AS position, SUM(r.total_points) AS total_points
+    RETURN position, p.player_name AS player, total_points
     ORDER BY total_points DESC
     LIMIT $limit
     """
@@ -341,6 +364,7 @@ TEMPLATE_REGISTRY: Dict[str, Callable] = {
     "consistent_performers": consistent_performers,
     "players_by_team_and_position": players_by_team_and_position,
     "budget_team_builder": budget_team_builder,
+    "form_leaders": form_leaders,
 }
 
 

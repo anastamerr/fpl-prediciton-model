@@ -85,9 +85,10 @@ class FPLEntityExtractor:
             return self._empty()
 
         normalized = query.lower()
+        comparison_mode = bool(re.search(r"\bvs\b|\bversus\b|vs\.|compare", normalized))
         return ExtractedEntities(
-            players=self._match_catalog(normalized, self.player_lookup),
-            teams=self._match_catalog(normalized, self.team_lookup),
+            players=self._match_catalog(normalized, self.player_lookup, max_hits=2 if comparison_mode else 1),
+            teams=self._match_catalog(normalized, self.team_lookup, max_hits=2 if comparison_mode else 1),
             positions=self._extract_positions(normalized),
             seasons=self._extract_seasons(normalized),
             gameweeks=self._extract_gameweeks(normalized),
@@ -124,42 +125,39 @@ class FPLEntityExtractor:
                 stats.append(canonical)
         return sorted(set(stats))
 
-    def _match_catalog(self, text: str, catalog: Dict[str, str]) -> List[str]:
+    def _match_catalog(self, text: str, catalog: Dict[str, str], max_hits: int = 1) -> List[str]:
         if not catalog:
             return []
 
-        hits = []
-        text_tokens = set(text.lower().split())
+        scored: List[tuple] = []
+        text_lower = text.lower()
+        text_tokens = set(text_lower.split())
 
-        # Strategy 1: Exact full name match (e.g., "erling haaland" in text)
         for key, label in catalog.items():
-            if key in text:
-                hits.append(label)
-
-        # Strategy 2: Last name matching for players (more common in queries)
-        # Match if any significant token from the catalog key appears as a whole word in text
-        for key, label in catalog.items():
-            key_parts = key.split()
-            # For multi-word names, check if last name (or any part >= 4 chars) matches
-            for part in key_parts:
+            key_lower = key
+            score = 0.0
+            # Exact full-name substring
+            if key_lower in text_lower:
+                score += 3.0 + len(key_lower) * 0.01
+            # Whole-word last name or significant part
+            parts = key_lower.split()
+            for part in parts:
                 if len(part) >= 4 and part in text_tokens:
-                    hits.append(label)
-                    break
+                    score += 1.5
+            # Fuzzy on longer tokens if nothing else
+            if score == 0:
+                tokens = [t for t in re.findall(r"[a-zA-Z]+", text_lower) if len(t) >= 5]
+                for token in tokens:
+                    matches = get_close_matches(token, [key_lower], n=1, cutoff=0.9)
+                    if matches:
+                        score += 0.9
+                        break
+            if score > 0:
+                scored.append((score, len(key_lower), label))
 
-        if hits:
-            return sorted(set(hits))
-
-        # Strategy 3: Fuzzy fallback with STRICT cutoff (only if no exact matches)
-        # Only match longer tokens to avoid false positives
-        tokens = [t for t in re.findall(r"[a-zA-Z]+", text) if len(t) >= 5]
-
-        for token in tokens:
-            # Use high cutoff for strict matching
-            matches = get_close_matches(token, catalog.keys(), n=1, cutoff=0.8)
-            if matches:
-                hits.append(catalog[matches[0]])
-
-        return sorted(set(hits))
+        scored.sort(key=lambda x: (-x[0], -x[1]))
+        top = [entry[2] for entry in scored[:max_hits]]
+        return top
 
     def _extract_numbers(self, text: str) -> Dict[str, Any]:
         numbers: Dict[str, Any] = {}

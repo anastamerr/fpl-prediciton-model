@@ -54,6 +54,8 @@ class FPLIntentClassifier:
                 "team",
                 "lineup",
                 "formation",
+                "captain",
+                "captaincy",
             ],
             "comparison_query": [
                 "compare",
@@ -188,6 +190,10 @@ class FPLIntentClassifier:
         if re.search(r"play next|next match|next game", normalized):
             scores["fixture_analysis"] = scores.get("fixture_analysis", 0.0) + 1.0
             matched_keywords.setdefault("fixture_analysis", []).append("next")
+
+        # If a position is mentioned alongside ranking language, boost position_search.
+        if matched_keywords.get("position_search") and ("top" in normalized or "best" in normalized):
+            scores["position_search"] = scores.get("position_search", 0.0) + 1.0
 
         # Historical queries mentioning seasons should dominate.
         if re.search(r"\bseason\b|\bhistorical\b|\bprevious\b", normalized):

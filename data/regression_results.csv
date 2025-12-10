@@ -1,0 +1,13 @@
+question,intent,retrieval_mode,baseline_count,embedding_count,issues,latency_ms,model
+Who are the top forwards this season?,position_search,baseline,10,0,"LLM mentions names not in context: ['Based', 'Gabriel Fernando', 'Jesus', 'Aleksandar Mitrovi']",1426,google/gemini-2.0-flash-lite-001
+Compare Haaland vs Kane for 2022-23,comparison_query,baseline,1,0,,1308,google/gemini-2.0-flash-lite-001
+Recommend a squad with budget of 100m,team_recommendation,baseline,15,0,,821,google/gemini-2.0-flash-lite-001
+Show me fixtures for Liverpool in gameweek 10,fixture_analysis,baseline,1,0,,2015,google/gemini-2.0-flash-lite-001
+How did Salah perform in gameweek 15?,player_performance,baseline,1,0,,1258,google/gemini-2.0-flash-lite-001
+Find players similar to Kevin De Bruyne,general_question,hybrid,10,14,"LLM mentions names not in context: ['Based', 'Kevin De', 'Bruyne', 'Martin', 'Heung']",1290,google/gemini-2.0-flash-lite-001
+Who should I captain this week?,team_recommendation,hybrid,15,0,Embedding search skipped: provide a player name to anchor similarity.,919,google/gemini-2.0-flash-lite-001
+Best XI from 2021-22 season,historical_query,baseline,4,0,"LLM mentions names not in context: ['Here', 'Alisson Ramses', 'Becker', 'Trent Alexander', 'Arnold']",1568,google/gemini-2.0-flash-lite-001
+Players with most goals in 2022-23,statistics_query,baseline,10,0,,6277,google/gemini-2.0-flash-lite-001
+Best midfielders under 8m,position_search,baseline,10,0,,1200,google/gemini-2.0-flash-lite-001
+Which players are in form right now?,form_analysis,hybrid,10,0,Embedding search skipped: provide a player name to anchor similarity.,1677,google/gemini-2.0-flash-lite-001
+Find players like Bruno Fernandes,general_question,embedding,0,14,"LLM mentions names not in context: ['Based', 'Bruno Fernandes', 'Dwight Mc', 'Son Heung', 'Pascal Gro']",1368,google/gemini-2.0-flash-lite-001
