@@ -142,11 +142,11 @@
 
 | Method | Expected Result |
 |--------|-----------------|
-| **Baseline** | MID players filtered by price < 8.0, ordered by points |
-| **Embeddings** | Top midfielders (may not respect budget) |
+| **Baseline** | Top midfielders by points (price data not available) |
+| **Embeddings** | High-return midfielders (ignores price) |
 
 **Expected Intent:** `position_search`
-**Expected Entities:** `positions: ["MID"], numerical_values: {max_price: 8.0}`
+**Expected Entities:** `positions: ["MID"]`
 
 ---
 
