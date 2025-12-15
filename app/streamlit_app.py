@@ -43,12 +43,9 @@ from src.llm.openrouter_client import OpenRouterClient  # noqa: E402
 
 
 MODELS = [
-    "mistralai/mistral-7b-instruct:free",
-    "moonshotai/kimi-k2:free",
-    "meta-llama/llama-3.3-70b-instruct:free",
-    "google/gemini-2.0-flash-exp:free",
-    "google/gemini-2.0-flash-lite-001",
     "openai/gpt-5-nano",
+    "google/gemini-2.0-flash-lite-001",
+    "meta-llama/llama-3.3-70b-instruct",
 ]
 
 RETRIEVAL_METHODS = [

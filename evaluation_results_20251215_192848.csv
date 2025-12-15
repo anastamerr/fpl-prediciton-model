@@ -1,0 +1,378 @@
+question,retrieval_method,model,intent,intent_confidence,entities_players,entities_teams,entities_seasons,entities_positions,baseline_records_count,embedding_hits_count,fused_count,cypher_query,retrieval_errors,llm_answer,llm_latency_ms,llm_prompt_tokens,llm_completion_tokens,llm_total_tokens,llm_error
+Who scored the most goals in the 2021-22 season?,Baseline Only,openai/gpt-5-nano,statistics_query,0.62,[],[],['2021-22'],[],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.goals_scored) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS goals_scored, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",,"The data provided doesn’t specify a season. Among the listed players, the highest goals are 23, achieved by Heung-Min Son and Mohamed Salah (tie).",9640,528,423,951,
+Who scored the most goals in the 2021-22 season?,Baseline Only,google/gemini-2.0-flash-lite-001,statistics_query,0.62,[],[],['2021-22'],[],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.goals_scored) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS goals_scored, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",,"Mohamed Salah and Heung-Min Son scored the most goals with 23 goals each.
+",2871,616,21,637,
+Who scored the most goals in the 2021-22 season?,Baseline Only,meta-llama/llama-3.3-70b-instruct,statistics_query,0.62,[],[],['2021-22'],[],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.goals_scored) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS goals_scored, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",,Heung-Min Son and Mohamed Salah scored the most goals with 23 goals each.,1658,534,19,553,
+Who scored the most goals in the 2021-22 season?,Hybrid (Baseline + BGE),openai/gpt-5-nano,statistics_query,0.62,[],[],['2021-22'],[],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.goals_scored) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS goals_scored, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,Heung-Min Son and Mohamed Salah — tied for the most with 23 goals each in the provided data.,7647,528,412,940,
+Who scored the most goals in the 2021-22 season?,Hybrid (Baseline + BGE),google/gemini-2.0-flash-lite-001,statistics_query,0.62,[],[],['2021-22'],[],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.goals_scored) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS goals_scored, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"Mohamed Salah and Heung-Min Son scored the most goals with 23 goals each in the 2021-22 season.
+",933,616,32,648,
+Who scored the most goals in the 2021-22 season?,Hybrid (Baseline + BGE),meta-llama/llama-3.3-70b-instruct,statistics_query,0.62,[],[],['2021-22'],[],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.goals_scored) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS goals_scored, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"According to the provided data, Heung-Min Son and Mohamed Salah scored the most goals with 23 goals each.",3015,534,25,559,
+Who scored the most goals in the 2021-22 season?,Hybrid (Baseline + MPNet),openai/gpt-5-nano,statistics_query,0.62,[],[],['2021-22'],[],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.goals_scored) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS goals_scored, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"The provided data doesn’t specify the season. Among the baseline players, the most goals are 23, achieved by Heung-Min Son and Mohamed Salah (tie).",10966,528,487,1015,
+Who scored the most goals in the 2021-22 season?,Hybrid (Baseline + MPNet),google/gemini-2.0-flash-lite-001,statistics_query,0.62,[],[],['2021-22'],[],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.goals_scored) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS goals_scored, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"Mohamed Salah and Heung-Min Son scored the most goals with 23 goals each.
+",1399,616,21,637,
+Who scored the most goals in the 2021-22 season?,Hybrid (Baseline + MPNet),meta-llama/llama-3.3-70b-instruct,statistics_query,0.62,[],[],['2021-22'],[],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.goals_scored) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS goals_scored, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,Heung-Min Son and Mohamed Salah scored the most goals with 23 goals each.,1711,534,19,553,
+Who scored the most goals in the 2021-22 season?,Embeddings Only (BGE),openai/gpt-5-nano,statistics_query,0.62,[],[],['2021-22'],[],0,0,0,,Embedding search skipped: no anchor player found.,"I don’t have data in this context about the top scorer for the 2021-22 season. The provided knowledge graph sections are empty. If you specify the league (e.g., Premier League 2021-22) or share relevant data, I can answer.",5711,126,381,507,
+Who scored the most goals in the 2021-22 season?,Embeddings Only (BGE),google/gemini-2.0-flash-lite-001,statistics_query,0.62,[],[],['2021-22'],[],0,0,0,,Embedding search skipped: no anchor player found.,"I am sorry, but the provided context does not contain information about goals scored in the 2021-22 season. Therefore, I am unable to answer your question.
+",1564,130,38,168,
+Who scored the most goals in the 2021-22 season?,Embeddings Only (BGE),meta-llama/llama-3.3-70b-instruct,statistics_query,0.62,[],[],['2021-22'],[],0,0,0,,Embedding search skipped: no anchor player found.,The context provided is insufficient to answer this question. There is no information about the 2021-22 season or player statistics.,3440,132,27,159,
+Who scored the most goals in the 2021-22 season?,Embeddings Only (MPNet),openai/gpt-5-nano,statistics_query,0.62,[],[],['2021-22'],[],0,0,0,,Embedding search skipped: no anchor player found.,"I don’t have any data in the provided context about the 2021-22 goalscorer. The context arrays (baseline, embedding_hits, fused, anchor_player) are empty. Please provide the relevant data or specify the league/competition, and I’ll identify the top scorer.",7197,126,512,638,
+Who scored the most goals in the 2021-22 season?,Embeddings Only (MPNet),google/gemini-2.0-flash-lite-001,statistics_query,0.62,[],[],['2021-22'],[],0,0,0,,Embedding search skipped: no anchor player found.,"I am sorry, but the provided context does not contain information about goals scored in the 2021-22 season. Therefore, I am unable to answer your question.
+",1524,130,38,168,
+Who scored the most goals in the 2021-22 season?,Embeddings Only (MPNet),meta-llama/llama-3.3-70b-instruct,statistics_query,0.62,[],[],['2021-22'],[],0,0,0,,Embedding search skipped: no anchor player found.,The context provided is insufficient to answer this question. There is no information about the 2021-22 season or player statistics.,1490,132,27,159,
+Which midfielder had the highest total points in 2022-23?,Baseline Only,openai/gpt-5-nano,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}","Insufficient data. The provided context has no player stats or 2022-23 totals. Please share the midfielders’ total points (or a data source/table), and I’ll identify the highest.",8044,126,431,557,
+Which midfielder had the highest total points in 2022-23?,Baseline Only,google/gemini-2.0-flash-lite-001,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}","I am sorry, but I cannot answer your question. The provided context does not contain information about player statistics, including total points for the 2022-23 season.
+",946,130,38,168,
+Which midfielder had the highest total points in 2022-23?,Baseline Only,meta-llama/llama-3.3-70b-instruct,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}","The provided context does not contain information about the 2022-23 season or player statistics. Therefore, I cannot answer this question accurately.",3310,132,29,161,
+Which midfielder had the highest total points in 2022-23?,Hybrid (Baseline + BGE),openai/gpt-5-nano,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}; Embedding search skipped: no anchor player found.","Insufficient context. The provided data contains no player stats or 2022-23 totals, so I can’t determine which midfielder had the highest total points. If you share the relevant data or a dataset, I can analyze it.",9311,126,309,435,
+Which midfielder had the highest total points in 2022-23?,Hybrid (Baseline + BGE),google/gemini-2.0-flash-lite-001,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}; Embedding search skipped: no anchor player found.","I am sorry, but the provided context does not contain information about player statistics, including total points for the 2022-23 season. Therefore, I am unable to answer your question.
+",992,130,42,172,
+Which midfielder had the highest total points in 2022-23?,Hybrid (Baseline + BGE),meta-llama/llama-3.3-70b-instruct,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}; Embedding search skipped: no anchor player found.",The context provided is insufficient to answer this question. There is no data available in the given context to determine which midfielder had the highest total points in 2022-23.,1678,131,36,167,
+Which midfielder had the highest total points in 2022-23?,Hybrid (Baseline + MPNet),openai/gpt-5-nano,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}; Embedding search skipped: no anchor player found.","The provided context has no player data or 2022-23 point totals. I can’t determine which midfielder had the highest total points from it.
+
+If you share a dataset (midfielders and their total points for 2022-23), I’ll identify the top scorer.",5196,126,383,509,
+Which midfielder had the highest total points in 2022-23?,Hybrid (Baseline + MPNet),google/gemini-2.0-flash-lite-001,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}; Embedding search skipped: no anchor player found.","I am sorry, but the provided context does not contain information about player statistics, including total points for the 2022-23 season. Therefore, I am unable to answer your question.
+",1560,130,42,172,
+Which midfielder had the highest total points in 2022-23?,Hybrid (Baseline + MPNet),meta-llama/llama-3.3-70b-instruct,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}; Embedding search skipped: no anchor player found.",The provided context is insufficient to answer this question. There are no statistics or data provided about the 2022-23 season or midfielder performances.,2066,131,30,161,
+Which midfielder had the highest total points in 2022-23?,Embeddings Only (BGE),openai/gpt-5-nano,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,Embedding search skipped: no anchor player found.,"Insufficient data. The provided context has no player stats or 2022-23 total points, so I can’t determine which midfielder had the highest total points. If you share the relevant data, I can identify the top midfielder.",4495,126,373,499,
+Which midfielder had the highest total points in 2022-23?,Embeddings Only (BGE),google/gemini-2.0-flash-lite-001,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,Embedding search skipped: no anchor player found.,"I am sorry, but I cannot answer this question. The provided context does not contain information about player statistics, including total points for the 2022-23 season.
+",920,130,38,168,
+Which midfielder had the highest total points in 2022-23?,Embeddings Only (BGE),meta-llama/llama-3.3-70b-instruct,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,Embedding search skipped: no anchor player found.,"The provided context does not contain information about the total points of midfielders in the 2022-23 season. Therefore, I cannot answer this question accurately.",3453,132,33,165,
+Which midfielder had the highest total points in 2022-23?,Embeddings Only (MPNet),openai/gpt-5-nano,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,Embedding search skipped: no anchor player found.,"The provided context contains no data on player points or 2022-23 midfield rankings, so I can’t determine which midfielder had the highest total points. Please share the relevant dataset or stats for me to analyze.",8276,126,497,623,
+Which midfielder had the highest total points in 2022-23?,Embeddings Only (MPNet),google/gemini-2.0-flash-lite-001,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,Embedding search skipped: no anchor player found.,"I am sorry, but the provided context does not contain information about player statistics, including total points for the 2022-23 season. Therefore, I am unable to answer your question.
+",1540,130,42,172,
+Which midfielder had the highest total points in 2022-23?,Embeddings Only (MPNet),meta-llama/llama-3.3-70b-instruct,statistics_query,0.5,[],[],['2022-23'],['MID'],0,0,0,,Embedding search skipped: no anchor player found.,"The provided context does not contain information about the 2022-23 season or player statistics. Therefore, I cannot determine which midfielder had the highest total points in 2022-23.",1661,132,39,171,
+Who had the most assists among forwards in 2021-22?,Baseline Only,openai/gpt-5-nano,statistics_query,0.75,[],[],['2021-22'],['FWD'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.assists) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS assists, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",,"Harry Kane, with 11 assists. (Michail Antonio has 10.)
+
+Note: The data provided does not specify the 2021-22 season.",14622,505,870,1375,
+Who had the most assists among forwards in 2021-22?,Baseline Only,google/gemini-2.0-flash-lite-001,statistics_query,0.75,[],[],['2021-22'],['FWD'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.assists) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS assists, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",,"Harry Kane and Michail Antonio, both forwards, had 11 and 10 assists respectively.
+",1558,599,22,621,
+Who had the most assists among forwards in 2021-22?,Baseline Only,meta-llama/llama-3.3-70b-instruct,statistics_query,0.75,[],[],['2021-22'],['FWD'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.assists) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS assists, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",,"Among forwards, Harry Kane had the most assists with 11.",1371,516,14,530,
+Who had the most assists among forwards in 2021-22?,Hybrid (Baseline + BGE),openai/gpt-5-nano,statistics_query,0.75,[],[],['2021-22'],['FWD'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.assists) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS assists, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"Harry Kane, with 11 assists (Michail Antonio had 10).",9943,505,469,974,
+Who had the most assists among forwards in 2021-22?,Hybrid (Baseline + BGE),google/gemini-2.0-flash-lite-001,statistics_query,0.75,[],[],['2021-22'],['FWD'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.assists) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS assists, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"Harry Kane and Michail Antonio, both forwards, had 11 and 10 assists respectively.
+",941,599,22,621,
+Who had the most assists among forwards in 2021-22?,Hybrid (Baseline + BGE),meta-llama/llama-3.3-70b-instruct,statistics_query,0.75,[],[],['2021-22'],['FWD'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.assists) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS assists, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"Among forwards, Harry Kane had the most assists with 11.",1807,516,14,530,
+Who had the most assists among forwards in 2021-22?,Hybrid (Baseline + MPNet),openai/gpt-5-nano,statistics_query,0.75,[],[],['2021-22'],['FWD'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.assists) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS assists, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"The context doesn’t specify 2021-22 season data. Among forwards in the provided data, Harry Kane has the most assists with 11.",9217,505,548,1053,
+Who had the most assists among forwards in 2021-22?,Hybrid (Baseline + MPNet),google/gemini-2.0-flash-lite-001,statistics_query,0.75,[],[],['2021-22'],['FWD'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.assists) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS assists, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"Based on the provided context, Harry Kane and Michail Antonio, both forwards, had 11 and 10 assists respectively. Therefore, Harry Kane had the most assists among forwards.
+",1834,599,39,638,
+Who had the most assists among forwards in 2021-22?,Hybrid (Baseline + MPNet),meta-llama/llama-3.3-70b-instruct,statistics_query,0.75,[],[],['2021-22'],['FWD'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.assists) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS assists, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"Among the forwards in the provided data, Harry Kane had the most assists with 11.",1643,516,19,535,
+Who had the most assists among forwards in 2021-22?,Embeddings Only (BGE),openai/gpt-5-nano,statistics_query,0.75,[],[],['2021-22'],['FWD'],0,0,0,,Embedding search skipped: no anchor player found.,"I don’t have any data in the provided context about assists or forwards for the 2021-22 season. The knowledge graph is empty, so I can’t identify who had the most assists among forwards.
+
+If you can share the relevant stats or a data source, I can determine the top assister. Alternatively, provide more context or questions I can help with based on available data.",6920,126,403,529,
+Who had the most assists among forwards in 2021-22?,Embeddings Only (BGE),google/gemini-2.0-flash-lite-001,statistics_query,0.75,[],[],['2021-22'],['FWD'],0,0,0,,Embedding search skipped: no anchor player found.,"I am sorry, but the provided context does not contain information about assists or any other statistics for the 2021-22 season. Therefore, I am unable to answer your question.
+",1143,130,41,171,
+Who had the most assists among forwards in 2021-22?,Embeddings Only (BGE),meta-llama/llama-3.3-70b-instruct,statistics_query,0.75,[],[],['2021-22'],['FWD'],0,0,0,,Embedding search skipped: no anchor player found.,"The provided context does not contain information about the 2021-22 season or player statistics, including assists among forwards. Therefore, I cannot provide an answer based on the given data.",1835,132,38,170,
+Who had the most assists among forwards in 2021-22?,Embeddings Only (MPNet),openai/gpt-5-nano,statistics_query,0.75,[],[],['2021-22'],['FWD'],0,0,0,,Embedding search skipped: no anchor player found.,"Insufficient data in the current context. There are no stats about assists or 2021-22 forwards to determine who had the most assists. Please provide the relevant dataset or allow sharing the needed stats, and I’ll answer.",8892,126,564,690,
+Who had the most assists among forwards in 2021-22?,Embeddings Only (MPNet),google/gemini-2.0-flash-lite-001,statistics_query,0.75,[],[],['2021-22'],['FWD'],0,0,0,,Embedding search skipped: no anchor player found.,"I am sorry, but the provided context does not contain information about assists or any other statistics for the 2021-22 season. Therefore, I am unable to answer your question.
+",1555,130,41,171,
+Who had the most assists among forwards in 2021-22?,Embeddings Only (MPNet),meta-llama/llama-3.3-70b-instruct,statistics_query,0.75,[],[],['2021-22'],['FWD'],0,0,0,,Embedding search skipped: no anchor player found.,The context provided is insufficient to answer this question. There are no stats or data available in the given context to determine who had the most assists among forwards in 2021-22.,1639,131,38,169,
+Which defenders had the most clean sheets in 2022-23?,Baseline Only,openai/gpt-5-nano,statistics_query,0.33,[],[],['2022-23'],['DEF'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.clean_sheets) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS clean_sheets, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",,"Based on the provided data (season not specified), the defenders with the most clean sheets are:
+
+- Kieran Trippier — 16
+- Fabian Schär — 15
+- Benjamin White — 15
+- Gabriel dos Santos Magalhães — 14
+
+The dataset doesn’t explicitly map these totals to the 2022-23 season.",15519,535,1295,1830,
+Which defenders had the most clean sheets in 2022-23?,Baseline Only,google/gemini-2.0-flash-lite-001,statistics_query,0.33,[],[],['2022-23'],['DEF'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.clean_sheets) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS clean_sheets, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",,"Kieran Trippier (16 clean sheets) and Benjamin White (15 clean sheets) had the most clean sheets among defenders.
+",1534,630,28,658,
+Which defenders had the most clean sheets in 2022-23?,Baseline Only,meta-llama/llama-3.3-70b-instruct,statistics_query,0.33,[],[],['2022-23'],['DEF'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.clean_sheets) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS clean_sheets, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",,"Based on the provided data, the defenders with the most clean sheets are: 
+
+1. Kieran Trippier (16 clean sheets)
+2. Fabian Schär (15 clean sheets)
+3. Benjamin White (15 clean sheets)
+4. Gabriel dos Santos Magalhães (14 clean sheets)",29886,551,64,615,
+Which defenders had the most clean sheets in 2022-23?,Hybrid (Baseline + BGE),openai/gpt-5-nano,statistics_query,0.33,[],[],['2022-23'],['DEF'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.clean_sheets) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS clean_sheets, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"Kieran Trippier had the most clean sheets among defenders with 16.
+
+Other defenders’ clean sheets:
+- Fabian Schär: 15
+- Benjamin White: 15
+- Gabriel dos Santos Magalhães: 14",14080,535,758,1293,
+Which defenders had the most clean sheets in 2022-23?,Hybrid (Baseline + BGE),google/gemini-2.0-flash-lite-001,statistics_query,0.33,[],[],['2022-23'],['DEF'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.clean_sheets) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS clean_sheets, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"Kieran Trippier (16 clean sheets) and Benjamin White and Gabriel dos Santos Magalh\u00e3es (15 clean sheets) had the most clean sheets among defenders.
+",1790,630,41,671,
+Which defenders had the most clean sheets in 2022-23?,Hybrid (Baseline + BGE),meta-llama/llama-3.3-70b-instruct,statistics_query,0.33,[],[],['2022-23'],['DEF'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.clean_sheets) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS clean_sheets, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"Based on the provided data, the defenders with the most clean sheets are Kieran Trippier with 16 clean sheets, and Fabian Schär, Benjamin White, and Gabriel dos Santos Magalhães, who each have 15 and 14 clean sheets respectively.",14140,552,57,609,
+Which defenders had the most clean sheets in 2022-23?,Hybrid (Baseline + MPNet),openai/gpt-5-nano,statistics_query,0.33,[],[],['2022-23'],['DEF'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.clean_sheets) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS clean_sheets, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,,0,0,0,0,"Failed to complete chat request: {""error"":{""message"":""This request requires more credits, or fewer max_tokens. You requested up to 65536 tokens, but can only afford 65520. To increase, visit https://openrouter.ai/settings/keys and create a key with a higher total limit"",""code"":402,""metadata"":{""provider_name"":null}},""user_id"":""user_2viTl9tgGDFZXaClZiykJAsi57e""}"
+Which defenders had the most clean sheets in 2022-23?,Hybrid (Baseline + MPNet),google/gemini-2.0-flash-lite-001,statistics_query,0.33,[],[],['2022-23'],['DEF'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.clean_sheets) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS clean_sheets, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"Kieran Trippier (16 clean sheets), Fabian Schär (15 clean sheets), and Benjamin White (15 clean sheets) had the most clean sheets among defenders.
+",1671,630,37,667,
+Which defenders had the most clean sheets in 2022-23?,Hybrid (Baseline + MPNet),meta-llama/llama-3.3-70b-instruct,statistics_query,0.33,[],[],['2022-23'],['DEF'],10,0,0,"
+    MATCH (s:Season {season_name: $season})-[:HAS_GW]->(:Gameweek)-[:HAS_FIXTURE]->(f:Fixture)
+    MATCH (p:Player)-[r:PLAYED_IN]->(f)
+    OPTIONAL MATCH (p)-[:PLAYS_AS]->(pos:Position)
+    WITH p, pos.name AS position, SUM(r.clean_sheets) AS stat_value, SUM(r.total_points) AS total_points
+    RETURN p.player_name AS player, position, stat_value AS clean_sheets, total_points
+    ORDER BY stat_value DESC
+    LIMIT $limit
+    ",Embedding search skipped: no anchor player found.,"Based on the provided data, the defenders with the most clean sheets are Kieran Trippier with 16 clean sheets, and Fabian Schär, Benjamin White, and Gabriel dos Santos Magalhães, who each have 15 and 14 clean sheets respectively.",3095,552,57,609,
+Which defenders had the most clean sheets in 2022-23?,Embeddings Only (BGE),openai/gpt-5-nano,statistics_query,0.33,[],[],['2022-23'],['DEF'],0,0,0,,Embedding search skipped: no anchor player found.,,0,0,0,0,"Failed to complete chat request: {""error"":{""message"":""This request requires more credits, or fewer max_tokens. You requested up to 65536 tokens, but can only afford 65520. To increase, visit https://openrouter.ai/settings/keys and create a key with a higher total limit"",""code"":402,""metadata"":{""provider_name"":null}},""user_id"":""user_2viTl9tgGDFZXaClZiykJAsi57e""}"
+Which defenders had the most clean sheets in 2022-23?,Embeddings Only (BGE),google/gemini-2.0-flash-lite-001,statistics_query,0.33,[],[],['2022-23'],['DEF'],0,0,0,,Embedding search skipped: no anchor player found.,"I am sorry, but the provided context does not contain information about clean sheets for defenders in the 2022-23 season. Therefore, I am unable to answer your question.
+",893,130,40,170,
+Which defenders had the most clean sheets in 2022-23?,Embeddings Only (BGE),meta-llama/llama-3.3-70b-instruct,statistics_query,0.33,[],[],['2022-23'],['DEF'],0,0,0,,Embedding search skipped: no anchor player found.,"The provided context does not contain information about defenders or clean sheets in the 2022-23 season. Therefore, I cannot provide an answer to this question.",2289,132,33,165,
+Which defenders had the most clean sheets in 2022-23?,Embeddings Only (MPNet),openai/gpt-5-nano,statistics_query,0.33,[],[],['2022-23'],['DEF'],0,0,0,,Embedding search skipped: no anchor player found.,,0,0,0,0,"Failed to complete chat request: {""error"":{""message"":""This request requires more credits, or fewer max_tokens. You requested up to 65536 tokens, but can only afford 65520. To increase, visit https://openrouter.ai/settings/keys and create a key with a higher total limit"",""code"":402,""metadata"":{""provider_name"":null}},""user_id"":""user_2viTl9tgGDFZXaClZiykJAsi57e""}"
+Which defenders had the most clean sheets in 2022-23?,Embeddings Only (MPNet),google/gemini-2.0-flash-lite-001,statistics_query,0.33,[],[],['2022-23'],['DEF'],0,0,0,,Embedding search skipped: no anchor player found.,"I am sorry, but I cannot answer this question. The provided context does not contain information about clean sheets or the 2022-23 season.
+",1570,130,34,164,
+Which defenders had the most clean sheets in 2022-23?,Embeddings Only (MPNet),meta-llama/llama-3.3-70b-instruct,statistics_query,0.33,[],[],['2022-23'],['DEF'],0,0,0,,Embedding search skipped: no anchor player found.,"The provided context does not contain information about the 2022-23 season or defender statistics. Therefore, I cannot answer this question accurately.",1724,132,29,161,
+Which players had the highest ICT index in 2021-22?,Baseline Only,openai/gpt-5-nano,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}",,0,0,0,0,"Failed to complete chat request: {""error"":{""message"":""This request requires more credits, or fewer max_tokens. You requested up to 65536 tokens, but can only afford 65520. To increase, visit https://openrouter.ai/settings/keys and create a key with a higher total limit"",""code"":402,""metadata"":{""provider_name"":null}},""user_id"":""user_2viTl9tgGDFZXaClZiykJAsi57e""}"
+Which players had the highest ICT index in 2021-22?,Baseline Only,google/gemini-2.0-flash-lite-001,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}","I am sorry, but the provided context does not contain information about the ICT index for the 2021-22 season. Therefore, I am unable to answer your question.
+",1561,130,39,169,
+Which players had the highest ICT index in 2021-22?,Baseline Only,meta-llama/llama-3.3-70b-instruct,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}",The context provided is insufficient to answer the question. There is no information about the ICT index or player statistics for the 2021-22 season.,1345,131,31,162,
+Which players had the highest ICT index in 2021-22?,Hybrid (Baseline + BGE),openai/gpt-5-nano,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}; Embedding search skipped: no anchor player found.",,0,0,0,0,"Failed to complete chat request: {""error"":{""message"":""This request requires more credits, or fewer max_tokens. You requested up to 65536 tokens, but can only afford 65451. To increase, visit https://openrouter.ai/settings/keys and create a key with a higher total limit"",""code"":402,""metadata"":{""provider_name"":null}},""user_id"":""user_2viTl9tgGDFZXaClZiykJAsi57e""}"
+Which players had the highest ICT index in 2021-22?,Hybrid (Baseline + BGE),google/gemini-2.0-flash-lite-001,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}; Embedding search skipped: no anchor player found.","I am sorry, but I cannot answer this question. The provided context does not contain information about the ICT index for the 2021-22 season.
+",1742,130,35,165,
+Which players had the highest ICT index in 2021-22?,Hybrid (Baseline + BGE),meta-llama/llama-3.3-70b-instruct,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}; Embedding search skipped: no anchor player found.",The context provided is insufficient to answer this question. There is no information about the ICT index or player statistics for the 2021-22 season.,1278,131,31,162,
+Which players had the highest ICT index in 2021-22?,Hybrid (Baseline + MPNet),openai/gpt-5-nano,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}; Embedding search skipped: no anchor player found.",,0,0,0,0,"Failed to complete chat request: {""error"":{""message"":""This request requires more credits, or fewer max_tokens. You requested up to 65536 tokens, but can only afford 65350. To increase, visit https://openrouter.ai/settings/keys and create a key with a higher total limit"",""code"":402,""metadata"":{""provider_name"":null}},""user_id"":""user_2viTl9tgGDFZXaClZiykJAsi57e""}"
+Which players had the highest ICT index in 2021-22?,Hybrid (Baseline + MPNet),google/gemini-2.0-flash-lite-001,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}; Embedding search skipped: no anchor player found.","I am sorry, but I cannot answer this question. The provided context does not contain information about the ICT index for the 2021-22 season.
+",1877,130,35,165,
+Which players had the highest ICT index in 2021-22?,Hybrid (Baseline + MPNet),meta-llama/llama-3.3-70b-instruct,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,"Baseline error: {neo4j_code: Neo.ClientError.Statement.SyntaxError} {message: Multiple result columns with the same name are not supported (line 6, column 47 (offset: 338))
+""    RETURN p.player_name AS player, position, stat_value AS total_points, total_points""
+                                               ^} {gql_status: 42001} {gql_status_description: error: syntax error or access rule violation - invalid syntax}; Embedding search skipped: no anchor player found.",The context provided is insufficient to answer this question. There is no information about the ICT index or player statistics for the 2021-22 season.,1571,131,31,162,
+Which players had the highest ICT index in 2021-22?,Embeddings Only (BGE),openai/gpt-5-nano,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,Embedding search skipped: no anchor player found.,,0,0,0,0,"Failed to complete chat request: {""error"":{""message"":""This request requires more credits, or fewer max_tokens. You requested up to 65536 tokens, but can only afford 65316. To increase, visit https://openrouter.ai/settings/keys and create a key with a higher total limit"",""code"":402,""metadata"":{""provider_name"":null}},""user_id"":""user_2viTl9tgGDFZXaClZiykJAsi57e""}"
+Which players had the highest ICT index in 2021-22?,Embeddings Only (BGE),google/gemini-2.0-flash-lite-001,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,Embedding search skipped: no anchor player found.,"I am sorry, but the provided context does not contain information about the ICT index for the 2021-22 season. Therefore, I am unable to answer your question.
+",931,130,39,169,
+Which players had the highest ICT index in 2021-22?,Embeddings Only (BGE),meta-llama/llama-3.3-70b-instruct,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,Embedding search skipped: no anchor player found.,"!!!!!!!!!!!!!!!!!!!!!!! 
+
+The provided context does not contain information about the ICT index or player performance for the 2021-22 season. Therefore, I cannot provide an answer to this question.",3070,132,59,191,
+Which players had the highest ICT index in 2021-22?,Embeddings Only (MPNet),openai/gpt-5-nano,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,Embedding search skipped: no anchor player found.,,0,0,0,0,"Failed to complete chat request: {""error"":{""message"":""This request requires more credits, or fewer max_tokens. You requested up to 65536 tokens, but can only afford 65316. To increase, visit https://openrouter.ai/settings/keys and create a key with a higher total limit"",""code"":402,""metadata"":{""provider_name"":null}},""user_id"":""user_2viTl9tgGDFZXaClZiykJAsi57e""}"
+Which players had the highest ICT index in 2021-22?,Embeddings Only (MPNet),google/gemini-2.0-flash-lite-001,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,Embedding search skipped: no anchor player found.,"I am sorry, but I cannot answer this question. The provided context does not contain information about the ICT index or player statistics for the 2021-22 season.
+",2654,130,38,168,
+Which players had the highest ICT index in 2021-22?,Embeddings Only (MPNet),meta-llama/llama-3.3-70b-instruct,statistics_query,1.0,[],[],['2021-22'],[],0,0,0,,Embedding search skipped: no anchor player found.,The context provided is insufficient to answer this question. There is no information about the ICT index or player statistics for the 2021-22 season.,2199,151,31,182,
