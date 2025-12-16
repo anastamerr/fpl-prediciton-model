@@ -1,9 +1,10 @@
 """
-Numeric embedding retriever using player node feature vectors.
+Embedding retriever using stored player node embeddings.
 
-This retriever requires an anchor player name. It pulls the player's numeric
-embedding from Neo4j (e.g., p.embedding_numeric) and performs vector similarity
-search via db.index.vector.queryNodes on a numeric index.
+This retriever requires an anchor player name. It pulls the player's embedding
+vector from Neo4j (via the configured property_key) and performs vector
+similarity search via db.index.vector.queryNodes against the configured vector
+index_name.
 """
 
 from dataclasses import dataclass
@@ -52,10 +53,12 @@ class EmbeddingRetriever:
         exclude_players: Optional[List[str]] = None,
     ) -> List[EmbeddingHit]:
         if not anchor_player:
-            raise ValueError("anchor_player is required for numeric embedding search.")
+            raise ValueError("anchor_player is required for embedding search.")
         embedding = self._fetch_embedding(anchor_player)
         if embedding is None:
-            raise ValueError(f"No numeric embedding found for player '{anchor_player}'.")
+            raise ValueError(
+                f"No embedding found for player '{anchor_player}' on property '{self.property_key}'."
+            )
 
         where_clauses = []
         if position:

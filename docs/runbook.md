@@ -30,12 +30,13 @@ streamlit run app/streamlit_app.py
 
 ## Generate Player Embeddings
 ```bash
-python scripts/generate_embeddings.py --model bge-small --use-text
+python scripts/generate_embeddings.py --model bge-small --strategy text
 # or MPNet
-python scripts/generate_embeddings.py --model mpnet --use-text
+python scripts/generate_embeddings.py --model mpnet --strategy text
 ```
 - Optional: `--limit 50` for smoke tests.
-- Creates vector index (`player_embeddings` or `player_embeddings_mpnet`) and writes `p.embedding`.
+- Creates vector index (`player_embeddings` or `player_embeddings_mpnet`) and writes `Player.embedding` / `Player.embedding_mpnet`.
+- You can also generate/regenerate embeddings from the Streamlit sidebar ("Embeddings" expander) when switching between BGE/MPNet retrieval.
 
 ## Run Tests
 ```bash

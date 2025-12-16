@@ -261,9 +261,12 @@ class NodeEmbeddingGenerator:
         property_key: str = "embedding",
         use_text: bool = True,
         limit: Optional[int] = None,
+        recreate_index: bool = False,
     ) -> int:
         """
         Writes embeddings to Neo4j and ensures vector index exists.
+
+        If recreate_index is True, drops the existing index (by name) first.
         """
         payload = self.generate_embeddings(use_text=use_text, limit=limit)
         if not payload:
@@ -290,6 +293,30 @@ class NodeEmbeddingGenerator:
         """
 
         with self.driver.session() as session:
-            session.run(index_cypher)
+            if recreate_index:
+                drop_attempts = [
+                    f"DROP INDEX {index_name} IF EXISTS",
+                    f"DROP INDEX {index_name}",
+                ]
+                dropped = False
+                last_exc: Optional[Exception] = None
+                for drop_cypher in drop_attempts:
+                    try:
+                        session.run(drop_cypher)
+                        dropped = True
+                        last_exc = None
+                        break
+                    except Exception as exc:  # pragma: no cover - version dependent
+                        last_exc = exc
+                if not dropped and last_exc is not None:
+                    raise last_exc
+
+                clear_cypher = f"""
+                MATCH (p:Player)
+                SET p.{property_key} = NULL
+                """
+                session.run(clear_cypher)
+
             session.run(update_cypher, rows=payload)
+            session.run(index_cypher)
         return len(payload)

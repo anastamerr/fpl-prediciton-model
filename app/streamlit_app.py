@@ -6,11 +6,12 @@ falls back to safe placeholders. Integrate live retrieval/LLM when credentials
 and infrastructure are available.
 """
 
+from dataclasses import dataclass
 from pathlib import Path
 import os
 import sys
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import streamlit as st
 from dotenv import load_dotenv
@@ -36,6 +37,7 @@ from src.preprocessing.entity_extractor import FPLEntityExtractor  # noqa: E402
 from src.retrieval.baseline_retriever import BaselineRetriever  # noqa: E402
 from src.retrieval.embedding_retriever import EmbeddingRetriever  # noqa: E402
 from src.retrieval.hybrid_retriever import HybridRetriever  # noqa: E402
+from src.retrieval.node_embeddings import NodeEmbeddingGenerator  # noqa: E402
 from src.utils.neo4j_client import get_driver, verify_connection  # noqa: E402
 from src.llm.prompt_builder import PromptBuilder  # noqa: E402
 from src.llm.llm_generator import LLMGenerator  # noqa: E402
@@ -57,12 +59,110 @@ RETRIEVAL_METHODS = [
 ]
 
 EXAMPLE_QUERIES = [
-    "Recommend a squad with budget constraints",
+    "Who had the most assists last season?",
     "Who are the top forwards this season?",
     "Compare Haaland vs Kane for 2022-23",
     "Show me fixtures for gameweek 10",
     "Players with most goals in 2021-22",
 ]
+
+
+@dataclass(frozen=True)
+class EmbeddingConfig:
+    model_alias: str
+    label: str
+    index_name: str
+    property_key: str
+    expected_dim: int
+
+
+EMBEDDING_CONFIGS: Dict[str, EmbeddingConfig] = {
+    "bge-small": EmbeddingConfig(
+        model_alias="bge-small",
+        label="BGE-small",
+        index_name="player_embeddings",
+        property_key="embedding",
+        expected_dim=384,
+    ),
+    "mpnet": EmbeddingConfig(
+        model_alias="mpnet",
+        label="MPNet",
+        index_name="player_embeddings_mpnet",
+        property_key="embedding_mpnet",
+        expected_dim=768,
+    ),
+}
+
+
+def resolve_embedding_config(retrieval_choice: str) -> Optional[EmbeddingConfig]:
+    if "MPNet" in retrieval_choice:
+        return EMBEDDING_CONFIGS["mpnet"]
+    if "BGE" in retrieval_choice:
+        return EMBEDDING_CONFIGS["bge-small"]
+    return None
+
+
+def _extract_vector_index_dim(options: Any) -> Optional[int]:
+    if not isinstance(options, dict):
+        return None
+    index_config = options.get("indexConfig") or {}
+    dim = index_config.get("vector.dimensions")
+    try:
+        return int(dim) if dim is not None else None
+    except (TypeError, ValueError):  # pragma: no cover
+        return None
+
+
+def get_embedding_status(driver, cfg: EmbeddingConfig) -> Dict[str, Any]:
+    status: Dict[str, Any] = {
+        "total_players": 0,
+        "embedded_players": 0,
+        "dim_counts": [],
+        "index_exists": False,
+        "index_dim": None,
+        "index_state": None,
+    }
+    if not driver:
+        return status
+
+    dim_cypher = f"""
+    MATCH (p:Player)
+    WHERE p.{cfg.property_key} IS NOT NULL
+    WITH size(p.{cfg.property_key}) AS dim, count(*) AS c
+    RETURN dim, c
+    ORDER BY c DESC
+    """
+
+    index_queries = [
+        "SHOW INDEXES YIELD name, type, state, options WHERE name = $name RETURN type, state, options",
+        "CALL db.indexes() YIELD name, type, state, options WHERE name = $name RETURN type, state, options",
+    ]
+
+    with driver.session() as session:
+        total_row = session.run("MATCH (p:Player) RETURN count(p) AS n").single()
+        status["total_players"] = int(total_row["n"] if total_row else 0)
+
+        dim_rows = session.run(dim_cypher).data()
+        status["dim_counts"] = dim_rows
+        status["embedded_players"] = int(sum((r.get("c") or 0) for r in dim_rows))
+
+        index_row = None
+        for query in index_queries:
+            try:
+                index_row = session.run(query, name=cfg.index_name).single()
+                if index_row:
+                    break
+            except Exception:  # pragma: no cover - version dependent
+                continue
+
+        if index_row:
+            index_data = index_row.data()
+            status["index_exists"] = True
+            status["index_state"] = index_data.get("state")
+            status["index_dim"] = _extract_vector_index_dim(index_data.get("options"))
+
+    return status
+
 
 _classifier = FPLIntentClassifier()
 _extractor = None  # Initialized after Neo4j connection
@@ -146,7 +246,7 @@ def run_pipeline(
         "Embeddings Only (BGE)",
         "Embeddings Only (MPNet)",
     ]
-    embed_model = "mpnet" if "MPNet" in retrieval_choice else "bge-small"
+    embedding_cfg = resolve_embedding_config(retrieval_choice) if use_embedding else None
 
     # Retrieval path selection
     if driver and use_baseline:
@@ -165,7 +265,14 @@ def run_pipeline(
 
     if driver and use_embedding:
         try:
-            emb = EmbeddingRetriever(driver, top_k=20)
+            if not embedding_cfg:
+                raise ValueError(f"Unknown embedding model in retrieval choice: {retrieval_choice}")
+            emb = EmbeddingRetriever(
+                driver,
+                top_k=20,
+                index_name=embedding_cfg.index_name,
+                property_key=embedding_cfg.property_key,
+            )
             # Extract anchor player and optional position filter
             position_filter = entities.positions[0] if entities.positions else None
             if anchor_player:
@@ -432,6 +539,71 @@ def main() -> None:
         st.header("Configuration")
         model_choice = st.selectbox("Model", MODELS, index=0)
         retrieval_choice = st.selectbox("Retrieval Method", RETRIEVAL_METHODS, index=0)
+
+        embedding_cfg = resolve_embedding_config(retrieval_choice)
+        if embedding_cfg:
+            with st.expander("Embeddings", expanded=False):
+                if not driver:
+                    st.warning("Neo4j not connected; cannot check or regenerate embeddings.")
+                else:
+                    status = get_embedding_status(driver, embedding_cfg)
+                    dim_counts = status.get("dim_counts") or []
+                    dims_str = ", ".join(
+                        f"{int(r.get('dim'))}d×{int(r.get('c'))}" for r in dim_counts if r.get("dim") is not None
+                    ) or "none"
+
+                    st.markdown(f"- Selected: `{embedding_cfg.label}` ({embedding_cfg.expected_dim}d)")
+                    st.markdown(
+                        f"- Storage: `Player.{embedding_cfg.property_key}`; index: `{embedding_cfg.index_name}`"
+                    )
+                    st.markdown(
+                        f"- Embedded players: {status.get('embedded_players', 0)}/{status.get('total_players', 0)} (dims: {dims_str})"
+                    )
+                    if status.get("index_exists"):
+                        st.markdown(
+                            f"- Index: `{status.get('index_state')}`; dim: `{status.get('index_dim')}`"
+                        )
+                    else:
+                        st.markdown("- Index: missing")
+
+                    dim_mismatch = any(
+                        (r.get("dim") is not None) and int(r.get("dim")) != embedding_cfg.expected_dim for r in dim_counts
+                    )
+                    index_dim = status.get("index_dim")
+                    index_dim_mismatch = (
+                        status.get("index_exists") and index_dim is not None and int(index_dim) != embedding_cfg.expected_dim
+                    )
+                    incomplete = (
+                        status.get("total_players", 0) > 0
+                        and status.get("embedded_players", 0) < status.get("total_players", 0)
+                    )
+
+                    if dim_mismatch or index_dim_mismatch:
+                        st.warning("Embeddings/index look like they were built with a different model/dimension.")
+                    if incomplete:
+                        st.info("Some players are missing embeddings for this model.")
+
+                    action = "Generate" if status.get("embedded_players", 0) == 0 else "Regenerate"
+                    if st.button(
+                        f"{action} {embedding_cfg.label} embeddings",
+                        key=f"regen_embeddings_{embedding_cfg.model_alias}",
+                    ):
+                        try:
+                            with st.spinner(
+                                f"Generating {embedding_cfg.label} embeddings (this can take a few minutes)..."
+                            ):
+                                generator = NodeEmbeddingGenerator(driver, model_alias=embedding_cfg.model_alias)
+                                count = generator.persist_embeddings(
+                                    index_name=embedding_cfg.index_name,
+                                    property_key=embedding_cfg.property_key,
+                                    use_text=True,
+                                    recreate_index=bool(dim_mismatch or index_dim_mismatch),
+                                )
+                            st.success(f"Wrote embeddings for {count} players.")
+                            st.rerun()
+                        except Exception as exc:
+                            st.error(f"Embedding generation failed: {exc}")
+
         st.markdown("**Example Queries**")
         for q in EXAMPLE_QUERIES:
             if st.button(q):

@@ -1,4 +1,4 @@
-# Retrieval Strategy (Baseline, Numeric Embeddings, Hybrid)
+# Retrieval Strategy (Baseline, Embeddings, Hybrid)
 
 ## Baseline (Cypher)
 - Templates in `src/retrieval/cypher_templates.py` cover: player performance by GW, top by position, team attack/defense, player form (per player), fixtures, season aggregates, position-based recommendations, comparisons, historical best XI, differentials, consistency, team/position filter, budget builder, and form leaders (recent top performers).
@@ -20,15 +20,17 @@
   RETURN p.player_name AS player, total_points
   ```
 
-## Embeddings (Numeric-Only)
-- Strategy: Numeric feature vectors (z-scored player stats) stored on each Player node.
-- Index: `player_embeddings_numeric` on property `embedding_numeric` (dimension = number of stats). Text embeddings are not used in retrieval.
-- `NodeEmbeddingGenerator` builds and persists these numeric vectors to Neo4j and ensures the numeric vector index exists.
-- `EmbeddingRetriever` requires an anchor player; it fetches the anchor's numeric vector and runs `db.index.vector.queryNodes('player_embeddings_numeric', k, anchor_vector)` with optional position filter.
+## Embeddings (Text, BGE/MPNet)
+- Strategy: Build a per-player text profile from aggregated PLAYED_IN stats, then embed it with the selected model.
+- BGE-small: vector index `player_embeddings` on `Player.embedding` (384 dims).
+- MPNet: vector index `player_embeddings_mpnet` on `Player.embedding_mpnet` (768 dims).
+- `NodeEmbeddingGenerator` builds/persists embeddings and creates the vector index.
+- `EmbeddingRetriever` requires an anchor player and runs `db.index.vector.queryNodes(index_name, k, anchor_vector)` with optional position filter.
+- Streamlit: switching between BGE/MPNet shows an "Embeddings" sidebar expander that lets you generate/regenerate the selected model's embeddings.
 
 ### Example: Similarity Query
 - Input: "Find players similar to Erling Haaland".
-- Flow: extract anchor player → load `embedding_numeric` → vector search on `player_embeddings_numeric` → return top-k players with scores. If no anchor player is present, embedding search is skipped and baseline/hybrid fallback applies.
+- Flow: extract anchor player -> load the selected embedding property -> vector search on the selected index -> return top-k players with scores.
 
 ## Hybrid
 - `HybridRetriever` runs baseline + embedding, then fuses by reciprocal rank style weighted scoring (default 0.7 baseline / 0.3 embedding).
@@ -37,4 +39,4 @@
 ## Error Handling and Missing Data
 - Baseline: missing entities yield graceful errors in `RetrievalResult.error`.
 - Embedding: if vector index or anchor player is unavailable, collector returns errors; hybrid falls back to baseline only.
-- Streamlit UI surfaces errors in the FPL Expert Answer and expander sections, with placeholders when drivers/keys are absent.*** End Patch"---
+- Streamlit UI surfaces errors in the FPL Expert Answer and expander sections, with placeholders when drivers/keys are absent.
